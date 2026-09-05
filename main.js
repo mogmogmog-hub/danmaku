@@ -186,6 +186,12 @@ app.whenReady().then(() => {
             createHistoryWindow();
           }
         },
+        {
+          label: 'モニター選択画面を開く', 
+          click: () => {
+            createSelectWindow();
+          }
+        },
         { type: 'separator' },
         { role: 'quit', label: '終了' }
       ]
