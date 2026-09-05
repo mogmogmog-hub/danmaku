@@ -14,7 +14,7 @@ const csvFile = path.join(__dirname, 'comments.csv');
 
 /* 初回ヘッダー書き込み（Shift-JIS） */
 if (!fs.existsSync(csvFile)) {
-  const header = iconv.encode("time,text,color,size,speed,fixed\n", "Shift_JIS");
+  const header = iconv.encode("time,studentId,text,color,size,speed,fixed\n", "Shift_JIS");
   fs.writeFileSync(csvFile, header);
 }
 
@@ -24,6 +24,7 @@ function saveCommentCSV(data) {
 
   const line = [
     jpTime,
+    data.studentId || "",                 // ★ 学籍番号を追加
     data.text.replace(/"/g, '""'),
     data.color || "",
     data.size || "",
@@ -53,11 +54,12 @@ function loadHistoryCSV() {
 
     rows.push({
       time: cols[0],
-      text: cols[1],
-      color: cols[2],
-      size: cols[3],
-      speed: cols[4],
-      fixed: cols[5] === "true"
+      studentId: cols[1],                 // ★ 学籍番号を読み込み
+      text: cols[2],
+      color: cols[3],
+      size: cols[4],
+      speed: cols[5],
+      fixed: cols[6] === "true"
     });
   }
 
