@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+    "electron": "electron ."
   },
   "keywords": [],
   "author": "",
