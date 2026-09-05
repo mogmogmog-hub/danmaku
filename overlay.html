@@ -2,103 +2,81 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: transparent;
+      background: rgba(0,0,0,0); /* 完全透明 */
     }
 
-    /* ============================
-       発光＋縁取り＋滑らかアニメーション
-       ============================ */
     .comment {
       position: absolute;
       white-space: nowrap;
-      font-weight: bold;
-
-      /* 発光エフェクト */
-      filter: drop-shadow(0 0 6px currentColor);
-      text-shadow: 0 0 4px currentColor;
-
-      /* アニメーション（CSSで滑らかに流す） */
-      animation-name: danmakuMove;
-      animation-timing-function: linear;
-      animation-fill-mode: forwards;
-    }
-
-    /* 左→右へ滑らかに流れる */
-    @keyframes danmakuMove {
-      from { transform: translateX(100vw); }
-      to   { transform: translateX(-100%); }
+      text-shadow: 2px 2px 4px black;
     }
   </style>
 </head>
-
 <body>
 <script>
   /* ================================
-     WebSocket 接続
+     WebSocket 接続（Render 用）
      ================================ */
-  const ws = new WebSocket('wss://danmaku-server.onrender.com');
+
+  const ws = new WebSocket('wss://danmaku-server.onrender.com'); 
+  // ↑ あなたの Render の URL に置き換えてね
 
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
+    /* 弾幕表示 */
     spawnComment(data);
 
-    // Electron 側へ CSV 保存
+    /* ★ Electron（ローカル）で CSV 保存 */
     window.electronAPI.saveComment(data);
   };
 
   /* ================================
-     レーン管理（重ならない弾幕）
+     レーン管理（30レーン）
      ================================ */
-  const laneCount = 30;
-  const lanes = Array(laneCount).fill(0);  // 各レーンが「いつ空くか」
-  const laneHeight = window.innerHeight / laneCount;
+  const lanes = Array(30).fill(false);
+  const laneHeight = window.innerHeight / lanes.length;
 
-  function getLane(durationMs) {
-    const now = performance.now();
-    let bestLane = 0;
-    let earliest = Infinity;
-
-    for (let i = 0; i < laneCount; i++) {
-      if (lanes[i] < earliest) {
-        earliest = lanes[i];
-        bestLane = i;
-      }
+  function getFreeLane() {
+    const free = [];
+    for (let i = 0; i < lanes.length; i++) {
+      if (!lanes[i]) free.push(i);
     }
-
-    // このレーンは durationMs 後に空く
-    lanes[bestLane] = now + durationMs;
-    return bestLane;
+    if (free.length === 0) return Math.floor(Math.random() * lanes.length);
+    const lane = free[Math.floor(Math.random() * free.length)];
+    lanes[lane] = true;
+    return lane;
   }
 
   /* ================================
-     コメント生成（③④⑥ 全部入り）
+     コメント生成（固定表示モード対応）
      ================================ */
   function spawnComment({ text, color, size, speed, fixed }) {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = text;
 
-    /* 色（発光エフェクトに currentColor が使われる） */
+    /* 色 */
     div.style.color = color || 'white';
 
     /* サイズ */
     const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
     div.style.fontSize = sizeMap[size] || '60px';
 
-    /* 固定表示モード（中央固定） */
+    /* ================================
+       固定表示モード（中央固定）
+       ================================ */
     if (fixed === true || fixed === "true") {
-      const lane = Math.floor(Math.random() * laneCount);
+
+      const lane = Math.floor(Math.random() * lanes.length);
       const y = lane * laneHeight;
 
       div.style.left = '50%';
-      div.style.top = `${y}px`;
+      div.style.top = y + 'px';
       div.style.transform = 'translateX(-50%)';
 
       document.body.appendChild(div);
@@ -108,26 +86,35 @@
     }
 
     /* ================================
-       流れる弾幕（CSSアニメーション）
+       通常の流れる弾幕
        ================================ */
+    const lane = getFreeLane();
+    div.style.top = (lane * laneHeight) + 'px';
 
-    const durationSec = speed || 12;
-    const durationMs = durationSec * 1000;
-
-    const lane = getLane(durationMs);
-    const y = lane * laneHeight;
-
-    div.style.top = `${y}px`;
-
-    // CSS アニメーションの時間を設定
-    div.style.animationDuration = `${durationSec}s`;
+    let x = window.innerWidth;
+    div.style.left = x + 'px';
 
     document.body.appendChild(div);
 
-    // アニメーション終了後に削除
-    div.addEventListener('animationend', () => {
-      div.remove();
-    });
+    const duration = speed || 12;
+    const pxPerSec = window.innerWidth / duration;
+    const pxPerFrame = pxPerSec / 60;
+
+    function animate() {
+      x -= pxPerFrame;
+      div.style.left = x + 'px';
+
+      const rect = div.getBoundingClientRect();
+      if (rect.right < 0) {
+        lanes[lane] = false;
+        div.remove();
+        return;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
   }
 </script>
 </body>
