@@ -15,28 +15,69 @@
       font-size: 16px;
       width: 100%;
     }
+    .selected {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+    }
+    #confirmBtn {
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 18px;
+      display: none; /* 最初は非表示 */
+    }
   </style>
 </head>
 <body>
   <h2>どのモニターに表示しますか？</h2>
   <div id="list">読み込み中...</div>
 
+  <button id="confirmBtn">このモニターに決定</button>
+
   <script>
     const list = document.getElementById('list');
+    const confirmBtn = document.getElementById('confirmBtn');
+
+    let selectedIndex = null; // 選択中のモニター番号
 
     window.electronAPI.getDisplays().then(displays => {
-      list.innerHTML = ""; // 初期メッセージを消す
+      list.innerHTML = "";
 
       displays.forEach((d, i) => {
         const btn = document.createElement('button');
         btn.textContent = `モニター${i+1} (${d.size.width}x${d.size.height})`;
-        btn.onclick = () => window.electronAPI.selectMonitor(i);
+
+        btn.onclick = () => {
+          selectedIndex = i;
+
+          // 全ボタンの選択状態をリセット
+          document.querySelectorAll('#list button').forEach(b => {
+            b.classList.remove('selected');
+          });
+
+          // 選択されたボタンだけハイライト
+          btn.classList.add('selected');
+
+          // ★ 仮選択したモニターに「選択中」オーバーレイを表示
+          window.electronAPI.previewMonitor(i);
+
+          // 決定ボタンを表示
+          confirmBtn.style.display = "block";
+        };
+
         list.appendChild(btn);
       });
     }).catch(err => {
       list.innerHTML = "モニター情報を取得できませんでした。";
       console.error(err);
     });
+
+    // 決定ボタンを押したとき
+    confirmBtn.onclick = () => {
+      if (selectedIndex !== null) {
+        window.electronAPI.selectMonitor(selectedIndex);
+      }
+    };
   </script>
 </body>
 </html>

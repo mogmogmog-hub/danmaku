@@ -3,8 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const iconv = require('iconv-lite');
 
-let selectWindow;   // モニター選択ウィンドウ
-let overlayWindow;  // 弾幕表示ウィンドウ
+let selectWindow;     // モニター選択ウィンドウ
+let overlayWindow;    // 弾幕表示ウィンドウ
+let previewWindow;    // 「選択中」オーバーレイ
 
 /* CSV 保存ファイル */
 const csvFile = path.join(__dirname, 'comments.csv');
@@ -45,10 +46,53 @@ function createSelectWindow() {
   selectWindow.loadFile('monitor-select.html');
 }
 
+/* 「選択中」オーバーレイ表示 */
+function showPreviewOverlay(displayIndex) {
+  const displays = screen.getAllDisplays();
+  const target = displays[displayIndex];
+
+  // 既存のプレビューがあれば閉じる
+  if (previewWindow) {
+    previewWindow.close();
+  }
+
+  previewWindow = new BrowserWindow({
+    x: target.bounds.x,
+    y: target.bounds.y,
+    width: target.bounds.width,
+    height: target.bounds.height,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    focusable: false,
+    hasShadow: false,
+  });
+
+  previewWindow.setIgnoreMouseEvents(true);
+
+  // HTML を直接埋め込む
+  const html = `
+    <body style="margin:0; background:rgba(0,0,0,0.3);
+                 display:flex; justify-content:center; align-items:center;">
+      <div style="font-size:80px; color:white; font-weight:bold;">
+        選択中
+      </div>
+    </body>
+  `;
+
+  previewWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+}
+
 /* オーバーレイウィンドウ（弾幕表示） */
 function createOverlayWindow(displayIndex) {
   const displays = screen.getAllDisplays();
   const target = displays[displayIndex];
+
+  // プレビューがあれば閉じる
+  if (previewWindow) {
+    previewWindow.close();
+    previewWindow = null;
+  }
 
   overlayWindow = new BrowserWindow({
     x: target.bounds.x,
@@ -73,7 +117,12 @@ app.whenReady().then(() => {
   createSelectWindow();
 });
 
-/* モニター選択 UI からの通知 */
+/* モニター選択 UI → 仮選択（プレビュー表示） */
+ipcMain.on('preview-monitor', (event, index) => {
+  showPreviewOverlay(index);
+});
+
+/* モニター選択 UI → 決定 */
 ipcMain.on('monitor-selected', (event, index) => {
   createOverlayWindow(index);
   selectWindow.close();
