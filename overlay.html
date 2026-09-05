@@ -18,15 +18,26 @@
 </head>
 <body>
 <script>
-  /* WebSocket 接続 */
-  const ws = new WebSocket('ws://localhost:3000');
+  /* ================================
+     WebSocket 接続（Render 用）
+     ================================ */
+
+  const ws = new WebSocket('wss://danmaku-server.onrender.com'); 
+  // ↑ あなたの Render の URL に置き換えてね
 
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
+
+    /* 弾幕表示 */
     spawnComment(data);
+
+    /* ★ Electron（ローカル）で CSV 保存 */
+    window.electronAPI.saveComment(data);
   };
 
-  /* レーン管理（30レーン） */
+  /* ================================
+     レーン管理（30レーン）
+     ================================ */
   const lanes = Array(30).fill(false);
   const laneHeight = window.innerHeight / lanes.length;
 
@@ -41,7 +52,9 @@
     return lane;
   }
 
-  /* コメント生成（固定表示モード対応） */
+  /* ================================
+     コメント生成（固定表示モード対応）
+     ================================ */
   function spawnComment({ text, color, size, speed, fixed }) {
     const div = document.createElement('div');
     div.className = 'comment';
@@ -54,10 +67,11 @@
     const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
     div.style.fontSize = sizeMap[size] || '60px';
 
-    /* ★ 固定表示モード（文字列 "true" にも対応） */
+    /* ================================
+       固定表示モード（中央固定）
+       ================================ */
     if (fixed === true || fixed === "true") {
 
-      // ★ レーンをランダムに選ぶ
       const lane = Math.floor(Math.random() * lanes.length);
       const y = lane * laneHeight;
 
@@ -71,7 +85,9 @@
       return;
     }
 
-    /* ★ 通常の流れる弾幕 */
+    /* ================================
+       通常の流れる弾幕
+       ================================ */
     const lane = getFreeLane();
     div.style.top = (lane * laneHeight) + 'px';
 
