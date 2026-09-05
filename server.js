@@ -81,7 +81,6 @@ function isNG(text) {
 /* コメント受信 → NG判定 → WebSocket配信 + CSV保存 */
 app.post('/comment', (req, res) => {
 
-  /* ★ fixed を受け取るように修正 */
   const { text, color, size, speed, studentId, fixed } = req.body;
 
   if (!text || text.trim() === "") {
@@ -95,31 +94,28 @@ app.post('/comment', (req, res) => {
     return res.json({ ok: true, muted: true });
   }
 
-  /* ★ fixed を payload に含める */
   const payload = {
     text: cleanText,
     color,
     size,
     speed,
     studentId,
-    fixed   // ← これがないと固定表示は絶対に動かない
+    fixed
   };
 
   saveCommentCSV(payload);
-
-  /* ★ WebSocket に fixed を送る */
   broadcast(JSON.stringify(payload));
 
   res.json({ ok: true });
 });
 
-/* ★ NGワード一覧取得 API */
+/* NGワード一覧取得 API */
 app.get('/ngwords', (req, res) => {
   ngWords = loadNGWords();
   res.json({ words: ngWords });
 });
 
-/* ★ NGワード更新 API */
+/* NGワード更新 API */
 app.post('/ngwords', (req, res) => {
   const { words } = req.body;
 
@@ -135,7 +131,7 @@ app.post('/ngwords', (req, res) => {
   res.json({ ok: true });
 });
 
-/* ★ コメント履歴取得 API（Shift-JIS → UTF-8 変換対応） */
+/* コメント履歴取得 API（Shift-JIS → UTF-8 変換対応） */
 app.get('/history', (req, res) => {
   if (!fs.existsSync(csvFile)) {
     return res.json({ rows: [] });
@@ -165,7 +161,9 @@ app.get('/history', (req, res) => {
   res.json({ rows });
 });
 
-/* ★ ログインAPI（学籍番号 + パスワード固定 8931） */
+/* ログインAPI（学籍番号 + パスワード） */
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD || "defaultpass";
+
 app.post('/login', (req, res) => {
   const { studentId, password } = req.body;
 
@@ -173,13 +171,16 @@ app.post('/login', (req, res) => {
     return res.json({ ok: false });
   }
 
-  if (password === "8931") {
+  if (password === LOGIN_PASSWORD) {
     return res.json({ ok: true });
   }
 
   res.json({ ok: false });
 });
 
-server.listen(3000, () => {
-  console.log('HTTP/WebSocket server on http://localhost:3000');
+/* Render 用 PORT 対応 */
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`HTTP/WebSocket server running on port ${PORT}`);
 });
