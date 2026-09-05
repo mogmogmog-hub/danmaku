@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const iconv = require('iconv-lite');
@@ -24,7 +24,7 @@ function saveCommentCSV(data) {
 
   const line = [
     jpTime,
-    data.text.replace(/"/g, '""'),  // CSVエスケープ
+    data.text.replace(/"/g, '""'),
     data.color || "",
     data.size || "",
     data.speed || "",
@@ -62,6 +62,23 @@ function loadHistoryCSV() {
   }
 
   return rows;
+}
+
+/* ============================
+   コメント履歴ウィンドウ
+   ============================ */
+function createHistoryWindow() {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  win.loadFile('history.html');
 }
 
 /* ============================
@@ -151,7 +168,30 @@ function createOverlayWindow(displayIndex) {
   overlayWindow.loadFile('overlay.html');
 }
 
+/* ============================
+   アプリ起動時
+   ============================ */
 app.whenReady().then(() => {
+
+  /* ★ メニュー追加 */
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'メニュー',
+      submenu: [
+        {
+          label: 'コメント履歴を開く',
+          click: () => {
+            createHistoryWindow();
+          }
+        },
+        { type: 'separator' },
+        { role: 'quit', label: '終了' }
+      ]
+    }
+  ]);
+
+  Menu.setApplicationMenu(menu);
+
   createSelectWindow();
 });
 
@@ -181,7 +221,7 @@ ipcMain.handle('get-displays', () => {
    IPC: コメント受信 → CSV 保存
    ============================ */
 ipcMain.on('comment-received', (event, data) => {
-  saveCommentCSV(data);  // ★ ローカル CSV 保存
+  saveCommentCSV(data);
 });
 
 /* ============================
