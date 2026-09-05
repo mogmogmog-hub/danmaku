@@ -7,9 +7,28 @@
   <style>
     body {
       font-family: sans-serif;
-      padding: 20px;
       max-width: 600px;
       margin: auto;
+
+      /* スマホでも中央寄せ */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: 100vh;
+
+      padding: 20px;
+    }
+
+    /* スマホ向け：余白を減らす */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
     }
 
     .input-row {
@@ -56,7 +75,7 @@
       margin-bottom: 8px;
     }
 
-    /* ★ 色選択グリッド（丸ボタン） */
+    /* 色選択グリッド（丸ボタン） */
     .color-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -79,7 +98,6 @@
       display: none;
     }
 
-    /* 選択された色に枠を付ける */
     .color-btn.selected {
       outline: 3px solid #000;
     }
@@ -90,13 +108,16 @@
       gap: 15px;
     }
 
+    /* スマホ向けレイアウト調整 */
     @media (max-width: 480px) {
       .input-row {
         flex-direction: column;
       }
+
       .input-row button {
         width: 100%;
       }
+
       .number-buttons button,
       .understanding-buttons button {
         flex: none;
@@ -143,7 +164,7 @@
       <label class="color-btn" style="background:#cc66ff;"><input type="radio" name="color" value="#cc66ff"></label>
       <label class="color-btn" style="background:#66ccff;"><input type="radio" name="color" value="#66ccff"></label>
       <label class="color-btn" style="background:#ff9900;"><input type="radio" name="color" value="#ff9900"></label>
-	  <label class="color-btn" style="background:#ff66cc;"><input type="radio" name="color" value="#ff66cc"></label>
+      <label class="color-btn" style="background:#ff66cc;"><input type="radio" name="color" value="#ff66cc"></label>
     </div>
   </div>
 
@@ -169,7 +190,7 @@
     </div>
   </div>
 
-  <!-- 固定表示ラジオボタン -->
+  <!-- 固定表示 -->
   <div class="group">
     <label>表示モード：</label>
     <div class="options">
@@ -177,9 +198,9 @@
       <label><input type="radio" name="fixed" value="true"> 固定表示</label>
     </div>
   </div>
-  
+
   <script>
-    /* ★ 色ボタンの選択状態を視覚的に反映 */
+    /* 色ボタンの選択状態を反映 */
     const colorButtons = document.querySelectorAll(".color-btn");
     colorButtons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -188,8 +209,8 @@
         btn.querySelector("input").checked = true;
       });
     });
-	
-	function getFixedMode() {
+
+    function getFixedMode() {
       return document.querySelector('input[name="fixed"]:checked').value === "true";
     }
 
