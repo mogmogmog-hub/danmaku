@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: rgba(0,0,0,0); /* 完全透明 */
+    }
+
+    .comment {
+      position: absolute;
+      white-space: nowrap;
+      text-shadow: 2px 2px 4px black;
+    }
+  </style>
+</head>
+<body>
+<script>
+  /* WebSocket 接続 */
+  const ws = new WebSocket('ws://localhost:3000');
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    spawnComment(data);
+  };
+
+  /* レーン管理（30レーン） */
+  const lanes = Array(30).fill(false);
+  const laneHeight = window.innerHeight / lanes.length;
+
+  function getFreeLane() {
+    const free = [];
+    for (let i = 0; i < lanes.length; i++) {
+      if (!lanes[i]) free.push(i);
+    }
+    if (free.length === 0) return Math.floor(Math.random() * lanes.length);
+    const lane = free[Math.floor(Math.random() * free.length)];
+    lanes[lane] = true;
+    return lane;
+  }
+
+  /* コメント生成（固定表示モード対応） */
+  function spawnComment({ text, color, size, speed, fixed }) {
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.textContent = text;
+
+    /* 色 */
+    div.style.color = color || 'white';
+
+    /* サイズ */
+    const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
+    div.style.fontSize = sizeMap[size] || '60px';
+
+    /* ★ 固定表示モード（文字列 "true" にも対応） */
+    if (fixed === true || fixed === "true") {
+
+      // ★ レーンをランダムに選ぶ
+      const lane = Math.floor(Math.random() * lanes.length);
+      const y = lane * laneHeight;
+
+      div.style.left = '50%';
+      div.style.top = y + 'px';
+      div.style.transform = 'translateX(-50%)';
+
+      document.body.appendChild(div);
+
+      setTimeout(() => div.remove(), 3000);
+      return;
+    }
+
+    /* ★ 通常の流れる弾幕 */
+    const lane = getFreeLane();
+    div.style.top = (lane * laneHeight) + 'px';
+
+    let x = window.innerWidth;
+    div.style.left = x + 'px';
+
+    document.body.appendChild(div);
+
+    const duration = speed || 12;
+    const pxPerSec = window.innerWidth / duration;
+    const pxPerFrame = pxPerSec / 60;
+
+    function animate() {
+      x -= pxPerFrame;
+      div.style.left = x + 'px';
+
+      const rect = div.getBoundingClientRect();
+      if (rect.right < 0) {
+        lanes[lane] = false;
+        div.remove();
+        return;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  }
+</script>
+</body>
+</html>

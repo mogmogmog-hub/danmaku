@@ -1,0 +1,18 @@
+{
+  "name": "ppt-danmaku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "electron": "^44.2.0",
+    "express": "^5.2.1",
+    "ws": "^8.21.3"
+  }
+}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ログイン</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>ログイン</h1>
+
+  <input id="studentId" placeholder="学籍番号を入力">
+  <input id="password" type="password" placeholder="パスワードを入力">
+
+  <button onclick="login()">ログイン</button>
+
+  <script>
+    async function login() {
+      const studentId = document.getElementById('studentId').value.trim();
+      const password  = document.getElementById('password').value.trim();
+
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, password })
+      });
+
+      const result = await res.json();
+
+      if (result.ok) {
+        // ログイン成功 → コメント投稿画面へ
+		localStorage.setItem("studentId", studentId);   // ★ 学籍番号を保存
+        window.location.href = "/comment.html";
+      } else {
+        alert("学籍番号またはパスワードが違います");
+      }
+    }
+  </script>
+</body>
+</html>

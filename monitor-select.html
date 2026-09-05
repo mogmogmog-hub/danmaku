@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>モニター選択</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>どのモニターに表示しますか？</h2>
+  <div id="list">読み込み中...</div>
+
+  <script>
+    const list = document.getElementById('list');
+
+    window.electronAPI.getDisplays().then(displays => {
+      list.innerHTML = ""; // 初期メッセージを消す
+
+      displays.forEach((d, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = `モニター${i+1} (${d.size.width}x${d.size.height})`;
+        btn.onclick = () => window.electronAPI.selectMonitor(i);
+        list.appendChild(btn);
+      });
+    }).catch(err => {
+      list.innerHTML = "モニター情報を取得できませんでした。";
+      console.error(err);
+    });
+  </script>
+</body>
+</html>

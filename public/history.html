@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>コメント履歴</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* テーブルをスマホで横スクロール可能にする */
+    .table-wrapper {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      min-width: 800px; /* スマホで横スクロール */
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>コメント履歴</h1>
+
+  <div class="table-wrapper">
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>時間</th>
+          <th>学籍番号</th>
+          <th>コメント</th>
+          <th>色</th>
+          <th>サイズ</th>
+          <th>速度</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadHistory() {
+      const res = await fetch('/history');
+      const data = await res.json();
+
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = '';
+
+      data.rows.forEach(row => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${row.time}</td>
+          <td>${row.studentId}</td>
+          <td>${row.text}</td>
+          <td>${row.color}</td>
+          <td>${row.size}</td>
+          <td>${row.speed}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    loadHistory();
+  </script>
+
+</body>
+</html>
