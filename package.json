@@ -1,17 +1,16 @@
 {
-  "name": "ppt-danmaku",
+  "name": "danmaku-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "description": "WebSocket server for danmaku",
+  "main": "server.js",
   "scripts": {
-    "start": "electron ."
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "electron": "^44.2.0",
     "express": "^5.2.1",
     "ws": "^8.21.3"
   }
