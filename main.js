@@ -36,6 +36,35 @@ function saveCommentCSV(data) {
 }
 
 /* ============================
+   CSV 読み込み（履歴表示用）
+   ============================ */
+function loadHistoryCSV() {
+  if (!fs.existsSync(csvFile)) return [];
+
+  const raw = fs.readFileSync(csvFile);
+  const utf8Text = iconv.decode(raw, "Shift_JIS");
+
+  const lines = utf8Text.split(/\r?\n/).filter(line => line.trim() !== "");
+
+  const rows = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",");
+
+    rows.push({
+      time: cols[0],
+      text: cols[1],
+      color: cols[2],
+      size: cols[3],
+      speed: cols[4],
+      fixed: cols[5] === "true"
+    });
+  }
+
+  return rows;
+}
+
+/* ============================
    モニター選択ウィンドウ
    ============================ */
 function createSelectWindow() {
@@ -153,4 +182,11 @@ ipcMain.handle('get-displays', () => {
    ============================ */
 ipcMain.on('comment-received', (event, data) => {
   saveCommentCSV(data);  // ★ ローカル CSV 保存
+});
+
+/* ============================
+   IPC: コメント履歴読み込み
+   ============================ */
+ipcMain.handle('load-history', () => {
+  return loadHistoryCSV();
 });
