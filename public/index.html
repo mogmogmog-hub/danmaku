@@ -7,14 +7,29 @@
   <style>
     body {
       font-family: sans-serif;
-      padding: 20px;
       max-width: 400px;
       margin: auto;
+
+      /* スマホでも中央に寄せる */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
+
+      padding: 20px;
+    }
+
+    /* スマホ向け：余白を減らす */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+        min-height: 100vh;
+      }
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     input {
@@ -57,7 +72,7 @@
 
       if (result.ok) {
         // ログイン成功 → コメント投稿画面へ
-		localStorage.setItem("studentId", studentId);   // ★ 学籍番号を保存
+        localStorage.setItem("studentId", studentId);   // ★ 学籍番号を保存
         window.location.href = "/comment.html";
       } else {
         alert("学籍番号またはパスワードが違います");
