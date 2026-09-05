@@ -7,30 +7,37 @@ let selectWindow;     // モニター選択ウィンドウ
 let overlayWindow;    // 弾幕表示ウィンドウ
 let previewWindow;    // 「選択中」オーバーレイ
 
-/* CSV 保存ファイル */
+/* ============================
+   CSV 保存ファイル（ローカル専用）
+   ============================ */
 const csvFile = path.join(__dirname, 'comments.csv');
 
 /* 初回ヘッダー書き込み（Shift-JIS） */
 if (!fs.existsSync(csvFile)) {
-  const header = iconv.encode("time,text,color,size,speed\n", "Shift_JIS");
+  const header = iconv.encode("time,text,color,size,speed,fixed\n", "Shift_JIS");
   fs.writeFileSync(csvFile, header);
 }
 
 /* コメントを CSV に保存（Shift-JIS） */
 function saveCommentCSV(data) {
+  const jpTime = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+
   const line = [
-    new Date().toISOString(),
+    jpTime,
     data.text.replace(/"/g, '""'),  // CSVエスケープ
     data.color || "",
     data.size || "",
-    data.speed || ""
+    data.speed || "",
+    data.fixed ? "true" : "false"
   ].join(",") + "\n";
 
   const encoded = iconv.encode(line, "Shift_JIS");
   fs.appendFileSync(csvFile, encoded);
 }
 
-/* モニター選択ウィンドウ */
+/* ============================
+   モニター選択ウィンドウ
+   ============================ */
 function createSelectWindow() {
   selectWindow = new BrowserWindow({
     width: 600,
@@ -46,12 +53,13 @@ function createSelectWindow() {
   selectWindow.loadFile('monitor-select.html');
 }
 
-/* 「選択中」オーバーレイ表示 */
+/* ============================
+   「選択中」オーバーレイ表示
+   ============================ */
 function showPreviewOverlay(displayIndex) {
   const displays = screen.getAllDisplays();
   const target = displays[displayIndex];
 
-  // 既存のプレビューがあれば閉じる
   if (previewWindow) {
     previewWindow.close();
   }
@@ -70,7 +78,6 @@ function showPreviewOverlay(displayIndex) {
 
   previewWindow.setIgnoreMouseEvents(true);
 
-  // HTML を直接埋め込む
   const html = `
     <body style="margin:0; background:rgba(0,0,0,0.3);
                  display:flex; justify-content:center; align-items:center;">
@@ -83,12 +90,13 @@ function showPreviewOverlay(displayIndex) {
   previewWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
-/* オーバーレイウィンドウ（弾幕表示） */
+/* ============================
+   弾幕オーバーレイウィンドウ
+   ============================ */
 function createOverlayWindow(displayIndex) {
   const displays = screen.getAllDisplays();
   const target = displays[displayIndex];
 
-  // プレビューがあれば閉じる
   if (previewWindow) {
     previewWindow.close();
     previewWindow = null;
@@ -104,6 +112,7 @@ function createOverlayWindow(displayIndex) {
     alwaysOnTop: true,
     hasShadow: false,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false
     }
@@ -117,23 +126,31 @@ app.whenReady().then(() => {
   createSelectWindow();
 });
 
-/* モニター選択 UI → 仮選択（プレビュー表示） */
+/* ============================
+   IPC: モニター選択プレビュー
+   ============================ */
 ipcMain.on('preview-monitor', (event, index) => {
   showPreviewOverlay(index);
 });
 
-/* モニター選択 UI → 決定 */
+/* ============================
+   IPC: モニター選択決定
+   ============================ */
 ipcMain.on('monitor-selected', (event, index) => {
   createOverlayWindow(index);
   selectWindow.close();
 });
 
-/* renderer → main にモニター一覧を要求する IPC */
+/* ============================
+   IPC: モニター一覧取得
+   ============================ */
 ipcMain.handle('get-displays', () => {
   return screen.getAllDisplays();
 });
 
-/* コメント受信（WebSocket サーバー側で呼ぶ想定） */
+/* ============================
+   IPC: コメント受信 → CSV 保存
+   ============================ */
 ipcMain.on('comment-received', (event, data) => {
-  saveCommentCSV(data);  // ★ CSV 保存
+  saveCommentCSV(data);  // ★ ローカル CSV 保存
 });
