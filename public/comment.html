@@ -9,19 +9,18 @@
       font-family: sans-serif;
       max-width: 600px;
       margin: auto;
+      padding: 20px;
 
-      /* スマホでも中央寄せ */
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       min-height: 100vh;
-
-      padding: 20px;
     }
 
-    /* スマホ向け：余白を減らす */
+    /* スマホ向け：左右の余白をなくす */
     @media (max-width: 480px) {
       body {
+        max-width: 100%;
+        margin: 0;
         padding: 10px;
       }
     }
@@ -50,8 +49,7 @@
     }
 
     .number-buttons,
-    .understanding-buttons,
-    .fixed-buttons {
+    .understanding-buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -75,7 +73,6 @@
       margin-bottom: 8px;
     }
 
-    /* 色選択グリッド（丸ボタン） */
     .color-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -94,10 +91,6 @@
       justify-content: center;
     }
 
-    .color-btn input {
-      display: none;
-    }
-
     .color-btn.selected {
       outline: 3px solid #000;
     }
@@ -108,7 +101,6 @@
       gap: 15px;
     }
 
-    /* スマホ向けレイアウト調整 */
     @media (max-width: 480px) {
       .input-row {
         flex-direction: column;
@@ -130,13 +122,11 @@
 <body>
   <h1>コメント投稿</h1>
 
-  <!-- コメント入力 -->
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
     <button onclick="send()">送信</button>
   </div>
 
-  <!-- 数字ボタン -->
   <div class="number-buttons">
     <button onclick="sendNumber('1')">1</button>
     <button onclick="sendNumber('2')">2</button>
@@ -146,13 +136,11 @@
     <button onclick="sendNumber('6')">6</button>
   </div>
 
-  <!-- 「わかった」「わからない」 -->
   <div class="understanding-buttons">
     <button onclick="sendNumber('わからない ×')">わからない ×</button>
     <button onclick="sendNumber('わかった 〇')" style="background-color:#FAD4A0;">わかった 〇</button>
   </div>
 
-  <!-- 色選択 -->
   <div class="group">
     <label>文字の色：</label>
     <div class="color-grid">
@@ -168,7 +156,6 @@
     </div>
   </div>
 
-  <!-- サイズ選択 -->
   <div class="group">
     <label>文字サイズ：</label>
     <div class="options">
@@ -179,7 +166,6 @@
     </div>
   </div>
 
-  <!-- 速度選択 -->
   <div class="group">
     <label>表示速度：</label>
     <div class="options">
@@ -190,7 +176,6 @@
     </div>
   </div>
 
-  <!-- 固定表示 -->
   <div class="group">
     <label>表示モード：</label>
     <div class="options">
@@ -200,7 +185,6 @@
   </div>
 
   <script>
-    /* 色ボタンの選択状態を反映 */
     const colorButtons = document.querySelectorAll(".color-btn");
     colorButtons.forEach(btn => {
       btn.addEventListener("click", () => {
