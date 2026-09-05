@@ -17,7 +17,6 @@
       margin-bottom: 20px;
     }
 
-    /* テーブルをスマホで横スクロール可能にする */
     .table-wrapper {
       overflow-x: auto;
       width: 100%;
@@ -25,7 +24,7 @@
 
     table {
       width: 100%;
-      min-width: 800px; /* スマホで横スクロール */
+      min-width: 800px;
       border-collapse: collapse;
       margin-top: 20px;
     }
@@ -48,18 +47,18 @@
 </head>
 
 <body>
-  <h1>コメント履歴</h1>
+  <h1>コメント履歴（ローカル CSV）</h1>
 
   <div class="table-wrapper">
     <table id="historyTable">
       <thead>
         <tr>
           <th>時間</th>
-          <th>学籍番号</th>
           <th>コメント</th>
           <th>色</th>
           <th>サイズ</th>
           <th>速度</th>
+          <th>固定</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -68,22 +67,21 @@
 
   <script>
     async function loadHistory() {
-      const res = await fetch('/history');
-      const data = await res.json();
+      const rows = await window.electronAPI.loadHistory();
 
       const tbody = document.querySelector('#historyTable tbody');
       tbody.innerHTML = '';
 
-      data.rows.forEach(row => {
+      rows.forEach(row => {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
           <td>${row.time}</td>
-          <td>${row.studentId}</td>
           <td>${row.text}</td>
           <td>${row.color}</td>
           <td>${row.size}</td>
           <td>${row.speed}</td>
+          <td>${row.fixed ? "固定" : ""}</td>
         `;
 
         tbody.appendChild(tr);
