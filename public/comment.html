@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- ★ これが必須 -->
   <title>コメント投稿</title>
 
   <style>
@@ -11,11 +11,13 @@
       max-width: 600px;
       margin: auto;
       padding: 20px;
+
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
+    /* ★ スマホ向け：左右の余白をなくす＋幅を100%にする */
     @media (max-width: 480px) {
       body {
         max-width: 100%;
@@ -89,11 +91,11 @@
       align-items: center;
       justify-content: center;
     }
-
+	
     .color-btn input {
       display: none;
     }
-
+	
     .color-btn.selected {
       outline: 3px solid #000;
     }
@@ -187,15 +189,6 @@
     </div>
   </div>
 
-  <!-- ★ 発光 ON/OFF -->
-  <div class="group">
-    <label>発光：</label>
-    <div class="options">
-      <label><input type="radio" name="glow" value="true"> ON</label>
-      <label><input type="radio" name="glow" value="false" checked> OFF</label>
-    </div>
-  </div>
-
   <script>
     const colorButtons = document.querySelectorAll(".color-btn");
     colorButtons.forEach(btn => {
@@ -216,13 +209,12 @@
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
-      const glow  = document.querySelector('input[name="glow"]:checked').value;
       const studentId = localStorage.getItem("studentId");
 
       await fetch('/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, color, size, speed, studentId, fixed, glow })
+        body: JSON.stringify({ text, color, size, speed, studentId, fixed })
       });
 
       document.getElementById('text').value = '';
@@ -233,13 +225,12 @@
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
-      const glow  = document.querySelector('input[name="glow"]:checked').value;
       const studentId = localStorage.getItem("studentId");
 
       await fetch('/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textValue, color, size, speed, studentId, fixed, glow })
+        body: JSON.stringify({ text: textValue, color, size, speed, studentId, fixed })
       });
     }
   </script>
