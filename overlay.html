@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-
   <style>
     body {
       margin: 0;
@@ -13,23 +12,17 @@
     .comment {
       position: absolute;
       white-space: nowrap;
-      font-weight: bold;
       text-shadow: 2px 2px 4px black;
-    }
-
-    /* ★ 発光エフェクト（glow=true のとき適用） */
-    .glow {
-      filter: drop-shadow(0 0 6px currentColor);
-      text-shadow: 0 0 4px currentColor;
+      font-weight: bold;
     }
   </style>
 </head>
-
 <body>
 <script>
   /* ================================
-     WebSocket 接続
+     WebSocket 接続（Render 用）
      ================================ */
+
   const ws = new WebSocket('wss://danmaku-server.onrender.com');
 
   ws.onmessage = (event) => {
@@ -44,8 +37,9 @@
   /* ================================
      レーン管理（重ならない弾幕）
      ================================ */
-  const laneCount = 25;
-  const lanes = Array(laneCount).fill(0);
+
+  const laneCount = 25;                 // レーン数
+  const lanes = Array(laneCount).fill(0); // 各レーンが「いつ空くか」
   const laneHeight = window.innerHeight / laneCount;
 
   function getLane(durationMs) {
@@ -60,6 +54,7 @@
       }
     }
 
+    // このレーンは durationMs 後に空く
     lanes[bestLane] = now + durationMs;
     return bestLane;
   }
@@ -67,16 +62,10 @@
   /* ================================
      コメント生成（固定表示モード対応）
      ================================ */
-  function spawnComment({ text, color, size, speed, fixed, glow }) {
-
+  function spawnComment({ text, color, size, speed, fixed }) {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = text;
-
-    /* ★ 発光 ON のとき glow クラスを付与 */
-    if (glow === true || glow === "true") {
-      div.classList.add("glow");
-    }
 
     /* 色 */
     div.style.color = color || 'white';
@@ -86,9 +75,10 @@
     div.style.fontSize = sizeMap[size] || '60px';
 
     /* ================================
-       固定表示モード
+       固定表示モード（中央固定）
        ================================ */
     if (fixed === true || fixed === "true") {
+
       const lane = Math.floor(Math.random() * laneCount);
       const y = lane * laneHeight;
 
@@ -105,10 +95,11 @@
     /* ================================
        通常の流れる弾幕（重ならない）
        ================================ */
-    const duration = speed || 12;
-    const durationMs = duration * 1000;
 
-    const lane = getLane(durationMs);
+    const duration = speed || 12;          // 秒
+    const durationMs = duration * 1000;    // ミリ秒
+
+    const lane = getLane(durationMs);      // ★ 重ならないレーン取得
     const y = lane * laneHeight;
 
     div.style.top = y + 'px';
