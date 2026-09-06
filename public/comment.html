@@ -26,13 +26,13 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     .input-row {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     .input-row input {
@@ -52,7 +52,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     .number-buttons button,
@@ -127,7 +127,7 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button onclick="send()">送信</button>
+    <button onclick="send()" style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
@@ -147,16 +147,16 @@
   <div class="group">
     <label>文字の色：</label>
     <div class="color-grid">
-      <label class="color-btn" style="background:#ffffff;"><input type="radio" name="color" value="#ffffff" checked></label>
-      <label class="color-btn" style="background:#000000;"><input type="radio" name="color" value="#000000"></label>
-      <label class="color-btn" style="background:#ff0000;"><input type="radio" name="color" value="#ff0000"></label>
+      <label class="color-btn" style="background:#000000;"><input type="radio" name="color" value="#000000" checked></label>
+      <label class="color-btn" style="background:#ffffff;"><input type="radio" name="color" value="#ffffff"></label>
       <label class="color-btn" style="background:#00ff00;"><input type="radio" name="color" value="#00ff00"></label>
+      <label class="color-btn" style="background:#ffff00;"><input type="radio" name="color" value="#ffff00"></label>	  
+      <label class="color-btn" style="background:#ff0000;"><input type="radio" name="color" value="#ff0000"></label>
       <label class="color-btn" style="background:#0000ff;"><input type="radio" name="color" value="#0000ff"></label>
-      <label class="color-btn" style="background:#ffff00;"><input type="radio" name="color" value="#ffff00"></label>
-      <label class="color-btn" style="background:#cc66ff;"><input type="radio" name="color" value="#cc66ff"></label>
       <label class="color-btn" style="background:#66ccff;"><input type="radio" name="color" value="#66ccff"></label>
       <label class="color-btn" style="background:#ff9900;"><input type="radio" name="color" value="#ff9900"></label>
       <label class="color-btn" style="background:#ff66cc;"><input type="radio" name="color" value="#ff66cc"></label>
+      <label class="color-btn" style="background:#cc66ff;"><input type="radio" name="color" value="#cc66ff"></label>
     </div>
   </div>
 
