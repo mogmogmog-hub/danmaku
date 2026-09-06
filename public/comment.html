@@ -148,6 +148,7 @@
     <label>文字の色：</label>
     <div class="color-grid">
       <label class="color-btn" style="background:#ffffff;"><input type="radio" name="color" value="#ffffff" checked></label>
+      <label class="color-btn" style="background:#000000;"><input type="radio" name="color" value="#000000"></label>
       <label class="color-btn" style="background:#ff0000;"><input type="radio" name="color" value="#ff0000"></label>
       <label class="color-btn" style="background:#00ff00;"><input type="radio" name="color" value="#00ff00"></label>
       <label class="color-btn" style="background:#0000ff;"><input type="radio" name="color" value="#0000ff"></label>
@@ -204,21 +205,30 @@
     /* ================================
        ★ クールタイム管理
        ================================ */
-    let lastSendTime = 0;  // 最後に送信した時刻（ms）
+    let lastSendTime = 0;
 
     function canSend() {
       const now = Date.now();
       if (now - lastSendTime < 1000) {
-        return false; // 1秒未満 → 送信不可
+        return false;
       }
       lastSendTime = now;
       return true;
     }
 
-    async function send() {
-      if (!canSend()) return;  // ★ クールタイム適用
+    /* ================================
+       ★ 256文字制限
+       ================================ */
+    function isTooLong(text) {
+      return text.length > 256;
+    }
 
-      const text = document.getElementById('text').value;
+    async function send() {
+      if (!canSend()) return;
+
+      const text = document.getElementById('text').value.trim();
+      if (isTooLong(text)) return;  // ★ 256文字以上は送信しない
+
       const color = document.querySelector('input[name="color"]:checked').value;
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
@@ -235,7 +245,9 @@
     }
 
     async function sendNumber(textValue) {
-      if (!canSend()) return;  // ★ クールタイム適用
+      if (!canSend()) return;
+
+      if (isTooLong(textValue)) return;  // ★ 数字ボタンでも制限適用
 
       const color = document.querySelector('input[name="color"]:checked').value;
       const size  = document.querySelector('input[name="size"]:checked').value;
