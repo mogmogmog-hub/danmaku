@@ -6,6 +6,7 @@ const iconv = require('iconv-lite');
 let selectWindow;     // モニター選択ウィンドウ
 let overlayWindow;    // 弾幕表示ウィンドウ
 let previewWindow;    // 「選択中」オーバーレイ
+let historyWindow;    // ★ コメント履歴ウィンドウ（常時表示）
 
 /* ============================
    CSV 保存ファイル（ローカル専用）
@@ -24,7 +25,7 @@ function saveCommentCSV(data) {
 
   const line = [
     jpTime,
-    data.studentId || "",                 // ★ 学籍番号を追加
+    data.studentId || "",
     data.text.replace(/"/g, '""'),
     data.color || "",
     data.size || "",
@@ -54,7 +55,7 @@ function loadHistoryCSV() {
 
     rows.push({
       time: cols[0],
-      studentId: cols[1],                 // ★ 学籍番号を読み込み
+      studentId: cols[1],
       text: cols[2],
       color: cols[3],
       size: cols[4],
@@ -70,7 +71,7 @@ function loadHistoryCSV() {
    コメント履歴ウィンドウ
    ============================ */
 function createHistoryWindow() {
-  const win = new BrowserWindow({
+  historyWindow = new BrowserWindow({
     width: 1000,
     height: 800,
     webPreferences: {
@@ -80,7 +81,7 @@ function createHistoryWindow() {
     }
   });
 
-  win.loadFile('history.html');
+  historyWindow.loadFile('history.html');
 }
 
 /* ============================
@@ -175,7 +176,7 @@ function createOverlayWindow(displayIndex) {
    ============================ */
 app.whenReady().then(() => {
 
-  /* ★ メニュー追加 */
+  /* ★ メニュー（履歴・モニター選択は残す） */
   const menu = Menu.buildFromTemplate([
     {
       label: 'メニュー',
@@ -187,7 +188,7 @@ app.whenReady().then(() => {
           }
         },
         {
-          label: 'モニター選択画面を開く', 
+          label: 'モニター選択画面を開く',
           click: () => {
             createSelectWindow();
           }
@@ -200,7 +201,9 @@ app.whenReady().then(() => {
 
   Menu.setApplicationMenu(menu);
 
+  // ★ 起動時に両方開く
   createSelectWindow();
+  createHistoryWindow();
 });
 
 /* ============================
@@ -215,7 +218,7 @@ ipcMain.on('preview-monitor', (event, index) => {
    ============================ */
 ipcMain.on('monitor-selected', (event, index) => {
   createOverlayWindow(index);
-  selectWindow.close();
+  selectWindow.close();   // ★ 履歴は閉じない
 });
 
 /* ============================
