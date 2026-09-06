@@ -6,7 +6,7 @@ const iconv = require('iconv-lite');
 let selectWindow;     // モニター選択ウィンドウ
 let overlayWindow;    // 弾幕表示ウィンドウ
 let previewWindow;    // 「選択中」オーバーレイ
-let historyWindow;    // ★ コメント履歴ウィンドウ（常時表示）
+let historyWindow;    // コメント履歴ウィンドウ
 
 /* ============================
    CSV 保存ファイル（ローカル専用）
@@ -176,7 +176,6 @@ function createOverlayWindow(displayIndex) {
    ============================ */
 app.whenReady().then(() => {
 
-  /* ★ メニュー（履歴・モニター選択は残す） */
   const menu = Menu.buildFromTemplate([
     {
       label: 'メニュー',
@@ -201,9 +200,9 @@ app.whenReady().then(() => {
 
   Menu.setApplicationMenu(menu);
 
-  // ★ 起動時に両方開く
-  createSelectWindow();
+  // ★ 起動時に履歴 → モニター選択の順で開く
   createHistoryWindow();
+  createSelectWindow();
 });
 
 /* ============================
@@ -218,7 +217,7 @@ ipcMain.on('preview-monitor', (event, index) => {
    ============================ */
 ipcMain.on('monitor-selected', (event, index) => {
   createOverlayWindow(index);
-  selectWindow.close();   // ★ 履歴は閉じない
+  selectWindow.close();   // 履歴は閉じない
 });
 
 /* ============================
