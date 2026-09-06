@@ -200,8 +200,7 @@ app.whenReady().then(() => {
 
   Menu.setApplicationMenu(menu);
 
-  // ★ 起動時に履歴 → モニター選択の順で開く
-  createHistoryWindow();
+  //createHistoryWindow(); // ★ 起動時に履歴 → モニター選択の順で開く
   createSelectWindow();
 });
 
