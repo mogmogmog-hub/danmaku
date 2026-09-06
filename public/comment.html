@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- ★ これが必須 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>コメント投稿</title>
 
   <style>
@@ -11,13 +11,11 @@
       max-width: 600px;
       margin: auto;
       padding: 20px;
-
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-    /* ★ スマホ向け：左右の余白をなくす＋幅を100%にする */
     @media (max-width: 480px) {
       body {
         max-width: 100%;
@@ -91,11 +89,11 @@
       align-items: center;
       justify-content: center;
     }
-	
+
     .color-btn input {
       display: none;
     }
-	
+
     .color-btn.selected {
       outline: 3px solid #000;
     }
@@ -203,7 +201,23 @@
       return document.querySelector('input[name="fixed"]:checked').value === "true";
     }
 
+    /* ================================
+       ★ クールタイム管理
+       ================================ */
+    let lastSendTime = 0;  // 最後に送信した時刻（ms）
+
+    function canSend() {
+      const now = Date.now();
+      if (now - lastSendTime < 1000) {
+        return false; // 1秒未満 → 送信不可
+      }
+      lastSendTime = now;
+      return true;
+    }
+
     async function send() {
+      if (!canSend()) return;  // ★ クールタイム適用
+
       const text = document.getElementById('text').value;
       const color = document.querySelector('input[name="color"]:checked').value;
       const size  = document.querySelector('input[name="size"]:checked').value;
@@ -221,6 +235,8 @@
     }
 
     async function sendNumber(textValue) {
+      if (!canSend()) return;  // ★ クールタイム適用
+
       const color = document.querySelector('input[name="color"]:checked').value;
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
