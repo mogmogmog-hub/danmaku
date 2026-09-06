@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+
   <style>
     body {
       margin: 0;
@@ -12,53 +13,70 @@
     .comment {
       position: absolute;
       white-space: nowrap;
+      font-weight: bold;
       text-shadow: 2px 2px 4px black;
+    }
+
+    /* ★ 発光エフェクト（glow=true のとき適用） */
+    .glow {
+      filter: drop-shadow(0 0 6px currentColor);
+      text-shadow: 0 0 4px currentColor;
     }
   </style>
 </head>
+
 <body>
 <script>
   /* ================================
-     WebSocket 接続（Render 用）
+     WebSocket 接続
      ================================ */
-
-  const ws = new WebSocket('wss://danmaku-server.onrender.com'); 
-  // ↑ あなたの Render の URL に置き換えてね
+  const ws = new WebSocket('wss://danmaku-server.onrender.com');
 
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
-    /* 弾幕表示 */
     spawnComment(data);
 
-    /* ★ Electron（ローカル）で CSV 保存 */
+    // Electron 側へ CSV 保存
     window.electronAPI.saveComment(data);
   };
 
   /* ================================
-     レーン管理（30レーン）
+     レーン管理（重ならない弾幕）
      ================================ */
-  const lanes = Array(30).fill(false);
-  const laneHeight = window.innerHeight / lanes.length;
+  const laneCount = 25;
+  const lanes = Array(laneCount).fill(0);
+  const laneHeight = window.innerHeight / laneCount;
 
-  function getFreeLane() {
-    const free = [];
-    for (let i = 0; i < lanes.length; i++) {
-      if (!lanes[i]) free.push(i);
+  function getLane(durationMs) {
+    const now = performance.now();
+    let bestLane = 0;
+    let earliest = Infinity;
+
+    for (let i = 0; i < laneCount; i++) {
+      if (lanes[i] < earliest) {
+        earliest = lanes[i];
+        bestLane = i;
+      }
     }
-    if (free.length === 0) return Math.floor(Math.random() * lanes.length);
-    const lane = free[Math.floor(Math.random() * free.length)];
-    lanes[lane] = true;
-    return lane;
+
+    lanes[bestLane] = now + durationMs;
+    return bestLane;
   }
 
   /* ================================
      コメント生成（固定表示モード対応）
      ================================ */
-  function spawnComment({ text, color, size, speed, fixed }) {
+  function spawnComment({ text, color, size, speed, fixed, glow }) {
+
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = text;
+
+    /* ★ 発光 ON のとき glow クラスを付与 */
+    if (glow === true || glow === "true") {
+      div.classList.add("glow");
+    }
 
     /* 色 */
     div.style.color = color || 'white';
@@ -68,11 +86,10 @@
     div.style.fontSize = sizeMap[size] || '60px';
 
     /* ================================
-       固定表示モード（中央固定）
+       固定表示モード
        ================================ */
     if (fixed === true || fixed === "true") {
-
-      const lane = Math.floor(Math.random() * lanes.length);
+      const lane = Math.floor(Math.random() * laneCount);
       const y = lane * laneHeight;
 
       div.style.left = '50%';
@@ -86,17 +103,21 @@
     }
 
     /* ================================
-       通常の流れる弾幕
+       通常の流れる弾幕（重ならない）
        ================================ */
-    const lane = getFreeLane();
-    div.style.top = (lane * laneHeight) + 'px';
+    const duration = speed || 12;
+    const durationMs = duration * 1000;
+
+    const lane = getLane(durationMs);
+    const y = lane * laneHeight;
+
+    div.style.top = y + 'px';
 
     let x = window.innerWidth;
     div.style.left = x + 'px';
 
     document.body.appendChild(div);
 
-    const duration = speed || 12;
     const pxPerSec = window.innerWidth / duration;
     const pxPerFrame = pxPerSec / 60;
 
@@ -106,7 +127,6 @@
 
       const rect = div.getBoundingClientRect();
       if (rect.right < 0) {
-        lanes[lane] = false;
         div.remove();
         return;
       }
