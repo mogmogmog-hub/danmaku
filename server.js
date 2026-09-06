@@ -45,11 +45,11 @@ function isNG(text) {
 
 /* ============================
    コメント受信 → NG判定 → WebSocket配信
-   （Render では CSV 保存しない）
    ============================ */
 app.post('/comment', (req, res) => {
 
-  const { text, color, size, speed, studentId, fixed } = req.body;
+  // ★ glow を追加
+  const { text, color, size, speed, studentId, fixed, glow } = req.body;
 
   if (!text || text.trim() === "") {
     return res.json({ ok: false });
@@ -68,13 +68,13 @@ app.post('/comment', (req, res) => {
     size,
     speed,
     studentId,
-    fixed
+    fixed,
+    glow   // ★ 発光フラグを WebSocket に送る
   };
 
-  // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
+  // Render では CSV 保存しない（Electron 側で保存）
   if (!process.env.RENDER) {
     console.log("ローカル環境 → CSV 保存:", payload);
-    // Electron 側で保存するため、ここでは何もしない
   }
 
   broadcast(JSON.stringify(payload));
