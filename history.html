@@ -15,16 +15,21 @@
     h1 {
       text-align: center;
       margin-bottom: 20px;
+      font-size: 24px;
     }
 
+    /* ============================
+       テーブルのレスポンシブ対応
+       ============================ */
     .table-wrapper {
-      overflow-x: auto;
+      overflow-x: auto;                 /* スマホで横スクロール */
+      -webkit-overflow-scrolling: touch; /* スマホで滑らかスクロール */
       width: 100%;
     }
 
     table {
       width: 100%;
-      min-width: 800px;
+      min-width: 800px;                 /* PC向け最低幅 */
       border-collapse: collapse;
       margin-top: 20px;
     }
@@ -43,6 +48,29 @@
     tr:nth-child(even) {
       background: #fafafa;
     }
+
+    /* ============================
+       スマホ向け調整
+       ============================ */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+      }
+
+      th, td {
+        font-size: 12px;
+        padding: 6px;
+      }
+
+      table {
+        min-width: 600px; /* スマホでは横スクロール前提 */
+      }
+    }
   </style>
 </head>
 
@@ -54,11 +82,12 @@
       <thead>
         <tr>
           <th>時間</th>
+<!--	  <th>学籍番号</th>  -->
           <th>コメント</th>
-          <th>色</th>
-          <th>サイズ</th>
-          <th>速度</th>
-          <th>固定</th>
+<!--	  <th>色</th>  -->
+<!--	  <th>サイズ</th>  -->
+<!--	  <th>速度</th>  -->
+<!--	  <th>固定</th>  -->
         </tr>
       </thead>
       <tbody></tbody>
@@ -77,11 +106,12 @@
 
         tr.innerHTML = `
           <td>${row.time}</td>
+<!--	  <td>${row.studentId}</td>  -->
           <td>${row.text}</td>
-          <td>${row.color}</td>
-          <td>${row.size}</td>
-          <td>${row.speed}</td>
-          <td>${row.fixed ? "固定" : ""}</td>
+<!--	  <td>${row.color}</td>  -->
+<!--	  <td>${row.size}</td>  -->
+<!--	  <td>${row.speed}</td>  -->
+<!--	  <td>${row.fixed ? "固定" : ""}</td>  -->
         `;
 
         tbody.appendChild(tr);
