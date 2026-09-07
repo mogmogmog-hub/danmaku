@@ -136,21 +136,21 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button id="sendBtn" onclick="send()" style="background-color:#FAD4A0;">送信</button>
+    <button id="sendBtn" onclick="send(this)" style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
-    <button onclick="sendNumber('1')">1</button>
-    <button onclick="sendNumber('2')">2</button>
-    <button onclick="sendNumber('3')">3</button>
-    <button onclick="sendNumber('4')">4</button>
-    <button onclick="sendNumber('5')">5</button>
-    <button onclick="sendNumber('6')">6</button>
+    <button onclick="sendNumber('1', this)">1</button>
+    <button onclick="sendNumber('2', this)">2</button>
+    <button onclick="sendNumber('3', this)">3</button>
+    <button onclick="sendNumber('4', this)">4</button>
+    <button onclick="sendNumber('5', this)">5</button>
+    <button onclick="sendNumber('6', this)">6</button>
   </div>
 
   <div class="understanding-buttons">
-    <button onclick="sendNumber('わからない ×')">わからない ×</button>
-    <button onclick="sendNumber('わかった 〇')" style="background-color:#FAD4A0;">わかった 〇</button>
+    <button onclick="sendNumber('わからない ×', this)">わからない ×</button>
+    <button onclick="sendNumber('わかった 〇', this)" style="background-color:#FAD4A0;">わかった 〇</button>
   </div>
 
   <div class="group">
@@ -223,7 +223,7 @@
 
     function canSend() {
       const now = Date.now();
-      if (now - lastSendTime < 1000) return false;
+      if (now - lastSendTime < 2000) return false;
       lastSendTime = now;
       return true;
     }
@@ -246,7 +246,7 @@
     /* ================================
        ★ 送信処理（改善版）
        ================================ */
-    async function send() {
+    async function send(btn) {
       if (!canSend()) return;
 
       const text = document.getElementById('text').value.trim();
@@ -257,14 +257,13 @@
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
 
-      const btn = document.getElementById("sendBtn");
       const status = document.getElementById("status");
 
       btn.disabled = true;
       btn.textContent = "送信中…";
 
       try {
-        const res = await fetch('/comment', {
+        await fetch('/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, color, size, speed, studentId, fixed })
@@ -287,7 +286,7 @@
     /* ================================
        ★ 数字ボタン送信（改善版）
        ================================ */
-    async function sendNumber(textValue) {
+    async function sendNumber(textValue, btn) {
       if (!canSend()) return;
       if (isTooLong(textValue)) return;
 
@@ -297,6 +296,10 @@
       const fixed = getFixedMode();
 
       const status = document.getElementById("status");
+
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "送信中…";
 
       try {
         await fetch('/comment', {
@@ -311,6 +314,9 @@
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
       }
+
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   </script>
 
