@@ -6,7 +6,7 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: rgba(0,0,0,0); /* 完全透明 */
+      background: rgba(0,0,0,0);
     }
 
     .comment {
@@ -20,26 +20,44 @@
 <body>
 <script>
   /* ================================
-     WebSocket 接続（Render 用）
+     WebSocket 自動再接続（切断検知）
      ================================ */
 
-  const ws = new WebSocket('wss://danmaku-server.onrender.com');
+  let ws = null;
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
+  function connectWS() {
+    ws = new WebSocket('wss://danmaku-server.onrender.com');
 
-    spawnComment(data);
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+    };
 
-    // Electron 側へ CSV 保存
-    window.electronAPI.saveComment(data);
-  };
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      spawnComment(data);
+      window.electronAPI.saveComment(data);
+    };
+
+    ws.onerror = (err) => {
+      console.log("WebSocket error:", err);
+      ws.close(); // → onclose が発火する
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed. Reconnecting in 3 seconds...");
+      setTimeout(connectWS, 3000);  // ★ 切断時だけ再接続
+    };
+  }
+
+  connectWS(); // 初回接続
+
 
   /* ================================
      レーン管理（重ならない弾幕）
      ================================ */
 
-  const laneCount = 25;                 // レーン数
-  const lanes = Array(laneCount).fill(0); // 各レーンが「いつ空くか」
+  const laneCount = 25;
+  const lanes = Array(laneCount).fill(0);
   const laneHeight = window.innerHeight / laneCount;
 
   function getLane(durationMs) {
@@ -54,31 +72,24 @@
       }
     }
 
-    // このレーンは durationMs 後に空く
     lanes[bestLane] = now + durationMs;
     return bestLane;
   }
 
   /* ================================
-     コメント生成（固定表示モード対応）
+     コメント生成
      ================================ */
   function spawnComment({ text, color, size, speed, fixed }) {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = text;
 
-    /* 色 */
     div.style.color = color || '#000000';
 
-    /* サイズ */
     const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
     div.style.fontSize = sizeMap[size] || '60px';
 
-    /* ================================
-       固定表示モード（中央固定）
-       ================================ */
     if (fixed === true || fixed === "true") {
-
       const lane = Math.floor(Math.random() * laneCount);
       const y = lane * laneHeight;
 
@@ -87,19 +98,14 @@
       div.style.transform = 'translateX(-50%)';
 
       document.body.appendChild(div);
-
       setTimeout(() => div.remove(), 3000);
       return;
     }
 
-    /* ================================
-       通常の流れる弾幕（重ならない）
-       ================================ */
+    const duration = speed || 12;
+    const durationMs = duration * 1000;
 
-    const duration = speed || 12;          // 秒
-    const durationMs = duration * 1000;    // ミリ秒
-
-    const lane = getLane(durationMs);      // ★ 重ならないレーン取得
+    const lane = getLane(durationMs);
     const y = lane * laneHeight;
 
     div.style.top = y + 'px';
