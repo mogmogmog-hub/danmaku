@@ -59,9 +59,17 @@
   const laneCount = 20;
   const lanes = Array(laneCount).fill(0);
 
-  // ★ タスクバーを含む画面全体の高さを使う
+  // ★ 最大フォントサイズ（xlarge = 120px）を安全マージンとして確保
+  const maxFontSize = 120;
+
+  // ★ タスクバーを含む画面全体の高さ
   const fullHeight = window.screen.height;
-  const laneHeight = fullHeight / laneCount;
+
+  // ★ 画面下の120pxを使わない「安全な高さ」
+  const effectiveHeight = fullHeight - maxFontSize;
+
+  // ★ この高さをレーンに割り当てる
+  const laneHeight = effectiveHeight / laneCount;
 
   function getLane(durationMs) {
     const now = performance.now();
