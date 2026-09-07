@@ -110,6 +110,13 @@ app.post('/login', (req, res) => {
 });
 
 /* ============================
+   Render スリープ防止用 ping API
+   ============================ */
+app.get('/ping', (req, res) => {
+  res.json({ ok: true });
+});
+
+/* ============================
    Render 用 PORT 対応
    ============================ */
 const PORT = process.env.PORT || 3000;
