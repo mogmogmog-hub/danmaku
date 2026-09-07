@@ -58,7 +58,10 @@
 
   const laneCount = 20;
   const lanes = Array(laneCount).fill(0);
-  const laneHeight = window.innerHeight / laneCount;
+
+  // ★ タスクバーを含む画面全体の高さを使う
+  const fullHeight = window.screen.height;
+  const laneHeight = fullHeight / laneCount;
 
   function getLane(durationMs) {
     const now = performance.now();
