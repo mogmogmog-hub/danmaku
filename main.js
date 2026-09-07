@@ -117,7 +117,7 @@ function showPreviewOverlay(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,
+    height: target.bounds.height,   // ★ タスクバー含む高さ
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -155,7 +155,7 @@ function createOverlayWindow(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,
+    height: target.bounds.height,   // ★ タスクバー含む高さに修正
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -200,7 +200,6 @@ app.whenReady().then(() => {
 
   Menu.setApplicationMenu(menu);
 
-  //createHistoryWindow(); // ★ 起動時に履歴 → モニター選択の順で開く
   createSelectWindow();
 });
 
@@ -216,7 +215,7 @@ ipcMain.on('preview-monitor', (event, index) => {
    ============================ */
 ipcMain.on('monitor-selected', (event, index) => {
   createOverlayWindow(index);
-  selectWindow.close();   // 履歴は閉じない
+  selectWindow.close();
 });
 
 /* ============================
