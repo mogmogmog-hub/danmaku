@@ -97,7 +97,7 @@
 
     div.style.color = color || '#000000';
 
-    const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
+    const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: maxFontSize };
     div.style.fontSize = sizeMap[size] || '60px';
 
     if (fixed === true || fixed === "true") {
