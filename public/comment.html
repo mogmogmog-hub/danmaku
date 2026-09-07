@@ -41,29 +41,10 @@
       font-size: 16px;
     }
 
-    /* ★ 送信ボタンの固定幅（PC） */
-    #sendBtn {
-      width: 110px;
-      box-sizing: border-box;
-    }
-
-    /* ★ 数字ボタン・理解度ボタンの固定幅（PC） */
-    .number-buttons button,
-    .understanding-buttons button {
-      width: 80px;
-      box-sizing: border-box;
-    }
-
-    /* ★ スマホ時のレスポンシブ幅 */
-    @media (max-width: 480px) {
-      #sendBtn {
-        width: 100%;
-      }
-
-      .number-buttons button,
-      .understanding-buttons button {
-        width: 45%;
-      }
+    .input-row button {
+      padding: 10px 20px;
+      font-size: 16px;
+      white-space: nowrap;
     }
 
     .number-buttons,
@@ -76,6 +57,7 @@
 
     .number-buttons button,
     .understanding-buttons button {
+      flex: 1;
       padding: 12px;
       font-size: 18px;
     }
@@ -123,24 +105,28 @@
       gap: 15px;
     }
 
+    @media (max-width: 480px) {
+      .input-row {
+        flex-direction: column;
+      }
+
+      .input-row button {
+        width: 100%;
+      }
+
+      .number-buttons button,
+      .understanding-buttons button {
+        flex: none;
+        width: 45%;
+      }
+    }
+
     /* ★ ステータス表示 */
     #status {
       text-align: center;
       min-height: 24px;
       margin-top: 10px;
       font-weight: bold;
-    }
-
-    /* ★ ボタンのサイズが変わる問題の完全解消 */
-    button:active {
-      transform: none;
-      border: inherit;
-      padding: inherit;
-      font-size: inherit;
-    }
-
-    button {
-      -webkit-tap-highlight-color: transparent;
     }
   </style>
 </head>
@@ -150,21 +136,21 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button id="sendBtn" onclick="send(this)" disabled style="background-color:#FAD4A0;">送信</button>
+    <button id="sendBtn" onclick="send()" style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
-    <button onclick="sendNumber('1', this)">1</button>
-    <button onclick="sendNumber('2', this)">2</button>
-    <button onclick="sendNumber('3', this)">3</button>
-    <button onclick="sendNumber('4', this)">4</button>
-    <button onclick="sendNumber('5', this)">5</button>
-    <button onclick="sendNumber('6', this)">6</button>
+    <button onclick="sendNumber('1')">1</button>
+    <button onclick="sendNumber('2')">2</button>
+    <button onclick="sendNumber('3')">3</button>
+    <button onclick="sendNumber('4')">4</button>
+    <button onclick="sendNumber('5')">5</button>
+    <button onclick="sendNumber('6')">6</button>
   </div>
 
   <div class="understanding-buttons">
-    <button onclick="sendNumber('わからない ×', this)">わからない ×</button>
-    <button onclick="sendNumber('わかった 〇', this)" style="background-color:#FAD4A0;">わかった 〇</button>
+    <button onclick="sendNumber('わからない ×')">わからない ×</button>
+    <button onclick="sendNumber('わかった 〇')" style="background-color:#FAD4A0;">わかった 〇</button>
   </div>
 
   <div class="group">
@@ -237,7 +223,7 @@
 
     function canSend() {
       const now = Date.now();
-      if (now - lastSendTime < 2000) return false;
+      if (now - lastSendTime < 1000) return false;
       lastSendTime = now;
       return true;
     }
@@ -258,24 +244,12 @@
     }
 
     /* ================================
-       ★ 入力欄が空なら送信ボタンを無効化
-       ================================ */
-    const textInput = document.getElementById("text");
-    const sendBtn = document.getElementById("sendBtn");
-
-    textInput.addEventListener("input", () => {
-      sendBtn.disabled = textInput.value.trim() === "";
-    });
-
-    sendBtn.disabled = true;
-
-    /* ================================
        ★ 送信処理（改善版）
        ================================ */
-    async function send(btn) {
+    async function send() {
       if (!canSend()) return;
 
-      const text = textInput.value.trim();
+      const text = document.getElementById('text').value.trim();
       if (isTooLong(text)) return;
 
       const color = document.querySelector('input[name="color"]:checked').value;
@@ -283,13 +257,14 @@
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
 
+      const btn = document.getElementById("sendBtn");
       const status = document.getElementById("status");
 
       btn.disabled = true;
       btn.textContent = "送信中…";
 
       try {
-        await fetch('/comment', {
+        const res = await fetch('/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, color, size, speed, studentId, fixed })
@@ -298,9 +273,8 @@
         status.textContent = "送信しました";
         setTimeout(() => status.textContent = "", 2000);
 
-        textInput.value = '';
-        textInput.focus();
-        sendBtn.disabled = true;
+        document.getElementById('text').value = '';
+        document.getElementById('text').focus();
 
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
@@ -313,7 +287,7 @@
     /* ================================
        ★ 数字ボタン送信（改善版）
        ================================ */
-    async function sendNumber(textValue, btn) {
+    async function sendNumber(textValue) {
       if (!canSend()) return;
       if (isTooLong(textValue)) return;
 
@@ -323,10 +297,6 @@
       const fixed = getFixedMode();
 
       const status = document.getElementById("status");
-
-      btn.disabled = true;
-      const originalText = btn.textContent;
-      btn.textContent = "送信中…";
 
       try {
         await fetch('/comment', {
@@ -341,9 +311,6 @@
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
       }
-
-      btn.disabled = false;
-      btn.textContent = originalText;
     }
   </script>
 
