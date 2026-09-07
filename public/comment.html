@@ -126,6 +126,11 @@
       margin-top: 10px;
       font-weight: bold;
     }
+
+    /* ★ 送信中だけ文字サイズを変更する */
+    button.sending {
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -270,6 +275,7 @@
       const status = document.getElementById("status");
 
       btn.disabled = true;
+      btn.classList.add("sending");
       btn.textContent = "送信…";
 
       try {
@@ -291,6 +297,7 @@
       }
 
       btn.disabled = false;
+      btn.classList.remove("sending");
       btn.textContent = "送信";
     }
 
@@ -309,6 +316,7 @@
       const status = document.getElementById("status");
 
       btn.disabled = true;
+      btn.classList.add("sending");
       const originalText = btn.textContent;
       btn.textContent = "送信…";
 
@@ -327,6 +335,7 @@
       }
 
       btn.disabled = false;
+      btn.classList.remove("sending");
       btn.textContent = originalText;
     }
   </script>
