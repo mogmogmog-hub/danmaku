@@ -128,6 +128,18 @@
       margin-top: 10px;
       font-weight: bold;
     }
+
+    /* ★ ボタンのサイズが変わる問題の解消 */
+    button:active {
+      transform: none;
+      border: inherit;
+      padding: inherit;
+      font-size: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
   </style>
 </head>
 
@@ -136,7 +148,7 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button id="sendBtn" onclick="send(this)" style="background-color:#FAD4A0;">送信</button>
+    <button id="sendBtn" onclick="send(this)" disabled style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
@@ -244,12 +256,24 @@
     }
 
     /* ================================
+       ★ 入力欄が空なら送信ボタンを無効化
+       ================================ */
+    const textInput = document.getElementById("text");
+    const sendBtn = document.getElementById("sendBtn");
+
+    textInput.addEventListener("input", () => {
+      sendBtn.disabled = textInput.value.trim() === "";
+    });
+
+    sendBtn.disabled = true;
+
+    /* ================================
        ★ 送信処理（改善版）
        ================================ */
     async function send(btn) {
       if (!canSend()) return;
 
-      const text = document.getElementById('text').value.trim();
+      const text = textInput.value.trim();
       if (isTooLong(text)) return;
 
       const color = document.querySelector('input[name="color"]:checked').value;
@@ -272,8 +296,9 @@
         status.textContent = "送信しました";
         setTimeout(() => status.textContent = "", 2000);
 
-        document.getElementById('text').value = '';
-        document.getElementById('text').focus();
+        textInput.value = '';
+        textInput.focus();
+        sendBtn.disabled = true;
 
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
