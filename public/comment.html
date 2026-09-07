@@ -72,7 +72,6 @@
       margin-bottom: 8px;
     }
 
-    /* ★ 色選択の視認性向上 */
     .color-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -81,11 +80,11 @@
     }
 
     .color-btn {
-      width: 56px;
-      height: 56px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
-      border: 3px solid #ccc;
+      border: 2px solid #ccc;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -96,7 +95,7 @@
     }
 
     .color-btn.selected {
-      outline: 4px solid #000;
+      outline: 3px solid #000;
     }
 
     .options {
@@ -121,7 +120,6 @@
       }
     }
 
-    /* ★ ステータス表示 */
     #status {
       text-align: center;
       min-height: 24px;
@@ -136,21 +134,21 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button id="sendBtn" onclick="send()" style="background-color:#FAD4A0;">送信</button>
+    <button id="sendBtn" onclick="send(this)" disabled style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
-    <button onclick="sendNumber('1')">1</button>
-    <button onclick="sendNumber('2')">2</button>
-    <button onclick="sendNumber('3')">3</button>
-    <button onclick="sendNumber('4')">4</button>
-    <button onclick="sendNumber('5')">5</button>
-    <button onclick="sendNumber('6')">6</button>
+    <button onclick="sendNumber('1', this)">1</button>
+    <button onclick="sendNumber('2', this)">2</button>
+    <button onclick="sendNumber('3', this)">3</button>
+    <button onclick="sendNumber('4', this)">4</button>
+    <button onclick="sendNumber('5', this)">5</button>
+    <button onclick="sendNumber('6', this)">6</button>
   </div>
 
   <div class="understanding-buttons">
-    <button onclick="sendNumber('わからない ×')">わからない ×</button>
-    <button onclick="sendNumber('わかった 〇')" style="background-color:#FAD4A0;">わかった 〇</button>
+    <button onclick="sendNumber('わからない ×', this)">わからない ×</button>
+    <button onclick="sendNumber('わかった 〇', this)" style="background-color:#FAD4A0;">わかった 〇</button>
   </div>
 
   <div class="group">
@@ -223,7 +221,7 @@
 
     function canSend() {
       const now = Date.now();
-      if (now - lastSendTime < 1000) return false;
+      if (now - lastSendTime < 2000) return false;
       lastSendTime = now;
       return true;
     }
@@ -244,12 +242,24 @@
     }
 
     /* ================================
+       ★ 入力欄が空なら送信ボタンを無効化
+       ================================ */
+    const textInput = document.getElementById("text");
+    const sendBtn = document.getElementById("sendBtn");
+
+    textInput.addEventListener("input", () => {
+      sendBtn.disabled = textInput.value.trim() === "";
+    });
+
+    sendBtn.disabled = true;
+
+    /* ================================
        ★ 送信処理（改善版）
        ================================ */
-    async function send() {
+    async function send(btn) {
       if (!canSend()) return;
 
-      const text = document.getElementById('text').value.trim();
+      const text = textInput.value.trim();
       if (isTooLong(text)) return;
 
       const color = document.querySelector('input[name="color"]:checked').value;
@@ -257,14 +267,13 @@
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
 
-      const btn = document.getElementById("sendBtn");
       const status = document.getElementById("status");
 
       btn.disabled = true;
-      btn.textContent = "送信中…";
+      btn.textContent = "送信…";
 
       try {
-        const res = await fetch('/comment', {
+        await fetch('/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, color, size, speed, studentId, fixed })
@@ -273,8 +282,9 @@
         status.textContent = "送信しました";
         setTimeout(() => status.textContent = "", 2000);
 
-        document.getElementById('text').value = '';
-        document.getElementById('text').focus();
+        textInput.value = '';
+        textInput.focus();
+        sendBtn.disabled = true;
 
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
@@ -287,7 +297,7 @@
     /* ================================
        ★ 数字ボタン送信（改善版）
        ================================ */
-    async function sendNumber(textValue) {
+    async function sendNumber(textValue, btn) {
       if (!canSend()) return;
       if (isTooLong(textValue)) return;
 
@@ -297,6 +307,10 @@
       const fixed = getFixedMode();
 
       const status = document.getElementById("status");
+
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "送信…";
 
       try {
         await fetch('/comment', {
@@ -311,6 +325,9 @@
       } catch (e) {
         status.textContent = "通信エラーが発生しました";
       }
+
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   </script>
 
