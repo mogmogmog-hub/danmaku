@@ -65,8 +65,8 @@
   // ★ タスクバーを含む画面全体の高さ
   const fullHeight = window.screen.height;
 
-  // ★ 画面下の120pxを使わない「安全な高さ」
-  const effectiveHeight = fullHeight - maxFontSize;
+  // ★ 画面下の120+10pxを使わない「安全な高さ」
+  const effectiveHeight = fullHeight - (maxFontSize + 10);
 
   // ★ この高さをレーンに割り当てる
   const laneHeight = effectiveHeight / laneCount;
