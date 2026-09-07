@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- ★ これが必須 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ログイン</title>
 
   <style>
@@ -11,7 +11,6 @@
       max-width: 400px;
       margin: auto;
       padding: 20px;
-
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -45,37 +44,77 @@
       font-size: 18px;
       margin-top: 10px;
     }
+
+    #error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+      min-height: 24px;
+    }
   </style>
 </head>
 
 <body>
   <h1>ログイン</h1>
 
-  <input id="studentId" placeholder="学籍番号を入力">
+  <input id="studentId" placeholder="学籍番号を入力" autofocus>
   <input id="password" type="password" placeholder="パスワードを入力">
 
-  <button onclick="login()">ログイン</button>
+  <button id="loginBtn" onclick="login()" style="background-color:#FAD4A0;">ログイン</button>
+
+  <div id="error"></div>
 
   <script>
     async function login() {
       const studentId = document.getElementById('studentId').value.trim();
       const password  = document.getElementById('password').value.trim();
+      const errorBox  = document.getElementById('error');
+      const btn       = document.getElementById('loginBtn');
 
-      const res = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId, password })
-      });
+      errorBox.textContent = "";
 
-      const result = await res.json();
-
-      if (result.ok) {
-        localStorage.setItem("studentId", studentId);
-        window.location.href = "/comment.html";
-      } else {
-        alert("学籍番号またはパスワードが違います");
+      // 入力チェック
+      if (!studentId) {
+        errorBox.textContent = "学籍番号を入力してください";
+        return;
       }
+      if (!password) {
+        errorBox.textContent = "パスワードを入力してください";
+        return;
+      }
+
+      // ローディング状態
+      btn.disabled = true;
+      btn.textContent = "ログイン中…";
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId, password })
+        });
+
+        const result = await res.json();
+
+        if (result.ok) {
+          localStorage.setItem("studentId", studentId);
+          window.location.href = "/comment.html";
+        } else {
+          errorBox.textContent = "学籍番号またはパスワードが違います";
+        }
+      } catch (e) {
+        errorBox.textContent = "通信エラーが発生しました";
+      }
+
+      // ボタンを元に戻す
+      btn.disabled = false;
+      btn.textContent = "ログイン";
     }
+
+    // Enterキーでログイン
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
   </script>
 </body>
 </html>
