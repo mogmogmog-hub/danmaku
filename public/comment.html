@@ -41,10 +41,29 @@
       font-size: 16px;
     }
 
-    .input-row button {
-      padding: 10px 20px;
-      font-size: 16px;
-      white-space: nowrap;
+    /* ★ 送信ボタンの固定幅（PC） */
+    #sendBtn {
+      width: 110px;
+      box-sizing: border-box;
+    }
+
+    /* ★ 数字ボタン・理解度ボタンの固定幅（PC） */
+    .number-buttons button,
+    .understanding-buttons button {
+      width: 80px;
+      box-sizing: border-box;
+    }
+
+    /* ★ スマホ時のレスポンシブ幅 */
+    @media (max-width: 480px) {
+      #sendBtn {
+        width: 100%;
+      }
+
+      .number-buttons button,
+      .understanding-buttons button {
+        width: 45%;
+      }
     }
 
     .number-buttons,
@@ -57,7 +76,6 @@
 
     .number-buttons button,
     .understanding-buttons button {
-      flex: 1;
       padding: 12px;
       font-size: 18px;
     }
@@ -105,22 +123,6 @@
       gap: 15px;
     }
 
-    @media (max-width: 480px) {
-      .input-row {
-        flex-direction: column;
-      }
-
-      .input-row button {
-        width: 100%;
-      }
-
-      .number-buttons button,
-      .understanding-buttons button {
-        flex: none;
-        width: 45%;
-      }
-    }
-
     /* ★ ステータス表示 */
     #status {
       text-align: center;
@@ -129,7 +131,7 @@
       font-weight: bold;
     }
 
-    /* ★ ボタンのサイズが変わる問題の解消 */
+    /* ★ ボタンのサイズが変わる問題の完全解消 */
     button:active {
       transform: none;
       border: inherit;
