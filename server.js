@@ -5,19 +5,7 @@ const iconv = require('iconv-lite');
 
 const app = express();
 const server = http.createServer(app);
-
-/* ============================
-   WebSocket サーバー（Render 互換）
-   ============================ */
-
-// ★ Render 互換の WebSocket 初期化（HTTPS と完全統合）
-const wss = new WebSocket.Server({ noServer: true });
-
-server.on('upgrade', (req, socket, head) => {
-  wss.handleUpgrade(req, socket, head, (ws) => {
-    wss.emit('connection', ws, req);
-  });
-});
+const wss = new WebSocket.Server({ server });
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -40,36 +28,13 @@ let ngWords = loadNGWords();
 console.log("NGワード読み込み:", ngWords);
 
 /* ============================
-   WebSocket 認証（STEP1）
+   WebSocket 接続
    ============================ */
-
-const VIEWER_TOKEN = process.env.WS_TOKEN || "default-viewer-token";
-
-wss.on('connection', (ws, req) => {
-
-  /* ★★★ Render 互換の token 取得ロジック（100% 動く） ★★★ */
-
-  let raw = req.url;               // "/?token=xxx" などが入る
-  if (raw.startsWith("/")) {
-    raw = raw.substring(1);        // "?token=xxx" にする
-  }
-
-  const params = new URLSearchParams(raw);
-  const token = params.get("token");
-
-  // 認証失敗 → 接続拒否
-  if (token !== VIEWER_TOKEN) {
-    console.log("× WebSocket 認証失敗 → 接続拒否");
-    ws.close();
-    return;
-  }
-
-  console.log("〇 WebSocket 認証成功 → viewer 接続");
+wss.on('connection', ws => {
+  console.log('client connected');
 });
 
-/* ============================
-   全クライアントに送信
-   ============================ */
+/* 全クライアントに送信 */
 function broadcast(msg) {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
@@ -113,6 +78,7 @@ app.post('/comment', (req, res) => {
   // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
   if (!process.env.RENDER) {
     console.log("ローカル環境 → CSV 保存:", payload);
+    // Electron 側で保存するため、ここでは何もしない
   }
 
   broadcast(JSON.stringify(payload));
