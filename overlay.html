@@ -20,36 +20,30 @@
 <body>
 <script>
   /* ================================
-     WebSocket URL・TOKEN・ROOMID
-     （Electron から受け取る）
+     WebSocket URL・TOKEN（Electron から受け取る）
      ================================ */
 
   const WS_URL   = window.electronAPI.getWSUrl();     // 例: "wss://danmaku-server.onrender.com"
   const WS_TOKEN = window.electronAPI.getWSToken();   // 例: "teacher-secret-token"
-  const ROOM_ID  = window.electronAPI.getRoomId();    // 例: "1-1"
 
 
   /* ================================
-     WebSocket 自動再接続（認証 + roomId）
+     WebSocket 自動再接続（認証付き）
      ================================ */
 
   let ws = null;
 
   function connectWS() {
 
-    // ★ 認証 + roomId を付けて接続
-    ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}&roomId=${ROOM_ID}`);
+    // ★ 認証付き WebSocket 接続（STEP1）
+    ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}`);
 
     ws.onopen = () => {
-      console.log(`WebSocket connected (roomId=${ROOM_ID})`);
+      console.log("WebSocket connected");
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      // ★ roomId が一致するコメントだけ表示
-      if (data.roomId !== ROOM_ID) return;
-
       spawnComment(data);
       window.electronAPI.saveComment(data);
     };
