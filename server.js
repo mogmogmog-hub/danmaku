@@ -12,11 +12,16 @@ app.use(express.json());
 
 /* ============================
    NGワード（環境変数から読み込み）
+   NGWORDS と NGWORDS2 の両方を使う
    ============================ */
 function loadNGWords() {
-  const env = process.env.NGWORDS;
-  if (!env) return [];
-  return env.split(",").map(w => w.trim()).filter(w => w !== "");
+  const env1 = process.env.NGWORDS || "";
+  const env2 = process.env.NGWORDS2 || "";
+
+  const list1 = env1.split(",").map(w => w.trim()).filter(w => w !== "");
+  const list2 = env2.split(",").map(w => w.trim()).filter(w => w !== "");
+
+  return [...list1, ...list2];
 }
 
 let ngWords = loadNGWords();
@@ -45,7 +50,6 @@ function isNG(text) {
 
 /* ============================
    コメント受信 → NG判定 → WebSocket配信
-   （Render では CSV 保存しない）
    ============================ */
 app.post('/comment', (req, res) => {
 
@@ -86,7 +90,7 @@ app.post('/comment', (req, res) => {
    NGワード一覧取得 API
    ============================ */
 app.get('/ngwords', (req, res) => {
-  ngWords = loadNGWords();
+  ngWords = loadNGWords();  // 最新の環境変数を反映
   res.json({ words: ngWords });
 });
 
