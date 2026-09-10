@@ -20,13 +20,23 @@
 <body>
 <script>
   /* ================================
-     WebSocket 自動再接続（切断検知）
+     WebSocket URL & TOKEN（Electron から受け取る）
+     ================================ */
+
+  const WS_URL = window.electronAPI.getWSUrl();     // 例: "wss://danmaku-server.onrender.com"
+  const WS_TOKEN = window.electronAPI.getWSToken(); // 例: "teacher-secret-token"
+
+
+  /* ================================
+     WebSocket 自動再接続（認証付き）
      ================================ */
 
   let ws = null;
 
   function connectWS() {
-    ws = new WebSocket('wss://danmaku-server.onrender.com');
+
+    // ★ 認証付き WebSocket 接続
+    ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}`);
 
     ws.onopen = () => {
       console.log("WebSocket connected");
@@ -86,7 +96,6 @@
      ================================ */
 
   function removeEmoji(text) {
-    // Unicode Emoji をすべて除去
     return text.replace(/\p{Emoji}/gu, "");
   }
 
@@ -96,12 +105,8 @@
      ================================ */
   function spawnComment({ text, color, size, speed, fixed }) {
 
-    /* ★ 絵文字だけ除去（コメントは流す or 固定表示のまま） */
     const cleanText = removeEmoji(text);
-
-    if (!cleanText || cleanText.trim() === "") {
-      return; // 絵文字だけの投稿は何も表示しない
-    }
+    if (!cleanText || cleanText.trim() === "") return;
 
     const div = document.createElement('div');
     div.className = 'comment';
@@ -113,9 +118,7 @@
     div.style.fontSize = sizeMap[size] || '60px';
 
 
-    /* ================================
-       固定表示
-       ================================ */
+    /* 固定表示 */
     if (fixed === true || fixed === "true") {
       const durationMs = 3000;
       const lane = getLane(durationMs);
@@ -131,11 +134,7 @@
       return;
     }
 
-
-    /* ================================
-       流れる弾幕
-       ================================ */
-
+    /* 流れる弾幕 */
     const duration = speed || 12;
     const durationMs = duration * 1000;
 
