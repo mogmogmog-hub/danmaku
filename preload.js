@@ -8,12 +8,29 @@ setInterval(() => {
 }, 13 * 60 * 1000); // 13分
 
 contextBridge.exposeInMainWorld('electronAPI', {
+
+  /* ================================
+     モニター関連
+     ================================ */
   getDisplays: () => ipcRenderer.invoke('get-displays'),
   previewMonitor: (index) => ipcRenderer.send('preview-monitor', index),
   selectMonitor: (index) => ipcRenderer.send('monitor-selected', index),
 
+  /* ================================
+     コメント保存
+     ================================ */
   saveComment: (data) => ipcRenderer.send('comment-received', data),
 
-  // コメント履歴読み込み
-  loadHistory: () => ipcRenderer.invoke('load-history')
+  /* ================================
+     コメント履歴読み込み
+     ================================ */
+  loadHistory: () => ipcRenderer.invoke('load-history'),
+
+  /* ================================
+     WebSocket URL / TOKEN / ROOMID
+     （main.js から値を受け取る）
+     ================================ */
+  getWSUrl: () => ipcRenderer.invoke('get-ws-url'),
+  getWSToken: () => ipcRenderer.invoke('get-ws-token'),
+  getRoomId: () => ipcRenderer.invoke('get-room-id')
 });
