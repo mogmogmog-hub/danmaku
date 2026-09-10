@@ -240,8 +240,7 @@ ipcMain.handle('load-history', () => {
 });
 
 /* ============================
-   IPC: WebSocket URL / TOKEN / ROOMID
+   IPC: WebSocket URL / TOKEN（STEP1 + STEP2）
    ============================ */
 ipcMain.handle('get-ws-url', () => process.env.WS_URL || "");
 ipcMain.handle('get-ws-token', () => process.env.WS_TOKEN || "");
-ipcMain.handle('get-room-id', () => process.env.ROOM_ID || "default");
