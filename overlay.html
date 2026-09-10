@@ -30,6 +30,7 @@
   const WS_URL   = await window.electronAPI.getWSUrl();
   const WS_TOKEN = await window.electronAPI.getWSToken();
 
+  console.log("=== viewer WebSocket 設定 ===");
   console.log("WS_URL:", WS_URL);
   console.log("WS_TOKEN:", WS_TOKEN);
 
@@ -37,25 +38,28 @@
 
   function connectWS() {
 
-    ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}`);
+    const url = `${WS_URL}?token=${WS_TOKEN}`;
+    console.log("接続開始:", url);
+
+    ws = new WebSocket(url);
 
     ws.onopen = () => {
-      console.log("WebSocket connected");
+      console.log("◎ viewer: WebSocket 接続成功");
     };
 
     ws.onmessage = (event) => {
+      console.log("◎ viewer: メッセージ受信:", event.data);
       const data = JSON.parse(event.data);
       spawnComment(data);
       window.electronAPI.saveComment(data);
     };
 
     ws.onerror = (err) => {
-      console.log("WebSocket error:", err);
-      ws.close();
+      console.log("× viewer: WebSocket エラー:", err);
     };
 
     ws.onclose = () => {
-      console.log("WebSocket closed. Reconnecting in 3 seconds...");
+      console.log("× viewer: WebSocket 切断 → 3秒後再接続");
       setTimeout(connectWS, 3000);
     };
   }
