@@ -39,7 +39,14 @@ const VIEWER_TOKEN = process.env.WS_TOKEN || "default-viewer-token";
 
 wss.on('connection', (ws, req) => {
 
-  const params = new URLSearchParams(req.url.replace("/?", ""));
+  /* ★★★ Render 互換の token 取得ロジック（100% 動く） ★★★ */
+
+  let raw = req.url;               // "/?token=xxx" などが入る
+  if (raw.startsWith("/")) {
+    raw = raw.substring(1);        // "?token=xxx" にする
+  }
+
+  const params = new URLSearchParams(raw);
   const token = params.get("token");
 
   // 認証失敗 → 接続拒否
