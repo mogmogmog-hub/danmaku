@@ -5,6 +5,10 @@ const iconv = require('iconv-lite');
 
 const app = express();
 const server = http.createServer(app);
+
+/* ============================
+   WebSocket サーバー（認証付き）
+   ============================ */
 const wss = new WebSocket.Server({ server });
 
 app.use(express.static('public'));
@@ -28,16 +32,37 @@ let ngWords = loadNGWords();
 console.log("NGワード読み込み:", ngWords);
 
 /* ============================
-   WebSocket 接続
+   WebSocket 接続（token + roomId 認証）
    ============================ */
-wss.on('connection', ws => {
-  console.log('client connected');
+
+const VIEWER_TOKEN = process.env.VIEWER_TOKEN || "default-viewer-token";
+
+wss.on('connection', (ws, req) => {
+
+  const params = new URLSearchParams(req.url.replace("/?", ""));
+  const token = params.get("token");
+  const roomId = params.get("roomId");
+
+  // 認証失敗 → 接続拒否
+  if (token !== VIEWER_TOKEN) {
+    console.log("❌ WebSocket 認証失敗");
+    ws.close();
+    return;
+  }
+
+  ws.roomId = roomId || "default";
+  console.log(`✅ WebSocket 接続: roomId=${ws.roomId}`);
 });
 
-/* 全クライアントに送信 */
-function broadcast(msg) {
+/* ============================
+   roomId ごとに送信
+   ============================ */
+function broadcast(msg, roomId) {
   wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
+    if (
+      client.readyState === WebSocket.OPEN &&
+      client.roomId === roomId
+    ) {
       client.send(msg);
     }
   });
@@ -53,7 +78,7 @@ function isNG(text) {
    ============================ */
 app.post('/comment', (req, res) => {
 
-  const { text, color, size, speed, studentId, fixed } = req.body;
+  const { text, color, size, speed, studentId, fixed, roomId } = req.body;
 
   if (!text || text.trim() === "") {
     return res.json({ ok: false });
@@ -72,16 +97,17 @@ app.post('/comment', (req, res) => {
     size,
     speed,
     studentId,
-    fixed
+    fixed,
+    roomId
   };
 
   // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
   if (!process.env.RENDER) {
     console.log("ローカル環境 → CSV 保存:", payload);
-    // Electron 側で保存するため、ここでは何もしない
   }
 
-  broadcast(JSON.stringify(payload));
+  // ★ roomId のクライアントだけに送信
+  broadcast(JSON.stringify(payload), roomId);
 
   res.json({ ok: true });
 });
@@ -90,7 +116,7 @@ app.post('/comment', (req, res) => {
    NGワード一覧取得 API
    ============================ */
 app.get('/ngwords', (req, res) => {
-  ngWords = loadNGWords();  // 最新の環境変数を反映
+  ngWords = loadNGWords();
   res.json({ words: ngWords });
 });
 
