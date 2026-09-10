@@ -32,37 +32,32 @@ let ngWords = loadNGWords();
 console.log("NGワード読み込み:", ngWords);
 
 /* ============================
-   WebSocket 接続（token + roomId 認証）
+   WebSocket 認証（STEP1）
    ============================ */
 
-const VIEWER_TOKEN = process.env.VIEWER_TOKEN || "default-viewer-token";
+const VIEWER_TOKEN = process.env.WS_TOKEN || "default-viewer-token";
 
 wss.on('connection', (ws, req) => {
 
   const params = new URLSearchParams(req.url.replace("/?", ""));
   const token = params.get("token");
-  const roomId = params.get("roomId");
 
   // 認証失敗 → 接続拒否
   if (token !== VIEWER_TOKEN) {
-    console.log("❌ WebSocket 認証失敗");
+    console.log("× WebSocket 認証失敗 → 接続拒否");
     ws.close();
     return;
   }
 
-  ws.roomId = roomId || "default";
-  console.log(`✅ WebSocket 接続: roomId=${ws.roomId}`);
+  console.log("〇 WebSocket 認証成功 → viewer 接続");
 });
 
 /* ============================
-   roomId ごとに送信
+   全クライアントに送信
    ============================ */
-function broadcast(msg, roomId) {
+function broadcast(msg) {
   wss.clients.forEach(client => {
-    if (
-      client.readyState === WebSocket.OPEN &&
-      client.roomId === roomId
-    ) {
+    if (client.readyState === WebSocket.OPEN) {
       client.send(msg);
     }
   });
@@ -78,7 +73,7 @@ function isNG(text) {
    ============================ */
 app.post('/comment', (req, res) => {
 
-  const { text, color, size, speed, studentId, fixed, roomId } = req.body;
+  const { text, color, size, speed, studentId, fixed } = req.body;
 
   if (!text || text.trim() === "") {
     return res.json({ ok: false });
@@ -97,8 +92,7 @@ app.post('/comment', (req, res) => {
     size,
     speed,
     studentId,
-    fixed,
-    roomId
+    fixed
   };
 
   // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
@@ -106,8 +100,7 @@ app.post('/comment', (req, res) => {
     console.log("ローカル環境 → CSV 保存:", payload);
   }
 
-  // ★ roomId のクライアントだけに送信
-  broadcast(JSON.stringify(payload), roomId);
+  broadcast(JSON.stringify(payload));
 
   res.json({ ok: true });
 });
@@ -116,7 +109,7 @@ app.post('/comment', (req, res) => {
    NGワード一覧取得 API
    ============================ */
 app.get('/ngwords', (req, res) => {
-  ngWords = loadNGWords();
+  ngWords = loadNGWords();  // 最新の環境変数を反映
   res.json({ words: ngWords });
 });
 
