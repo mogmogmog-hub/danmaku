@@ -18,24 +18,25 @@
   </style>
 </head>
 <body>
+
 <script>
-  /* ================================
-     WebSocket URL・TOKEN（Electron から受け取る）
-     ================================ */
+/* ============================================
+   WebSocket 接続（Promise 対応版）
+   ============================================ */
 
-  const WS_URL   = window.electronAPI.getWSUrl();     // 例: "wss://danmaku-server.onrender.com"
-  const WS_TOKEN = window.electronAPI.getWSToken();   // 例: "teacher-secret-token"
+(async () => {
 
+  // ★ Promise を await で解決する（最重要）
+  const WS_URL   = await window.electronAPI.getWSUrl();
+  const WS_TOKEN = await window.electronAPI.getWSToken();
 
-  /* ================================
-     WebSocket 自動再接続（認証付き）
-     ================================ */
+  console.log("WS_URL:", WS_URL);
+  console.log("WS_TOKEN:", WS_TOKEN);
 
   let ws = null;
 
   function connectWS() {
 
-    // ★ 認証付き WebSocket 接続（STEP1）
     ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}`);
 
     ws.onopen = () => {
@@ -61,7 +62,11 @@
 
   connectWS();
 
+})();
+</script>
 
+
+<script>
   /* ================================
      レーン管理（重ならない弾幕）
      ================================ */
@@ -90,15 +95,12 @@
     return bestLane;
   }
 
-
   /* ================================
      絵文字判定 & 除去
      ================================ */
-
   function removeEmoji(text) {
     return text.replace(/\p{Emoji}/gu, "");
   }
-
 
   /* ================================
      コメント生成
@@ -116,7 +118,6 @@
 
     const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
     div.style.fontSize = sizeMap[size] || '60px';
-
 
     /* 固定表示 */
     if (fixed === true || fixed === "true") {
@@ -167,5 +168,6 @@
     requestAnimationFrame(animate);
   }
 </script>
+
 </body>
 </html>
