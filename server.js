@@ -7,9 +7,17 @@ const app = express();
 const server = http.createServer(app);
 
 /* ============================
-   WebSocket サーバー（認証付き）
+   WebSocket サーバー（Render 互換）
    ============================ */
-const wss = new WebSocket.Server({ server });
+
+// ★ Render 互換の WebSocket 初期化（HTTPS と完全統合）
+const wss = new WebSocket.Server({ noServer: true });
+
+server.on('upgrade', (req, socket, head) => {
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    wss.emit('connection', ws, req);
+  });
+});
 
 app.use(express.static('public'));
 app.use(express.json());
