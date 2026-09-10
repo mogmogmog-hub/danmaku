@@ -117,7 +117,7 @@ function showPreviewOverlay(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,   // ★ タスクバー含む高さ
+    height: target.bounds.height,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -155,7 +155,7 @@ function createOverlayWindow(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,   // ★ タスクバー含む高さに修正
+    height: target.bounds.height,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -238,3 +238,10 @@ ipcMain.on('comment-received', (event, data) => {
 ipcMain.handle('load-history', () => {
   return loadHistoryCSV();
 });
+
+/* ============================
+   IPC: WebSocket URL / TOKEN / ROOMID
+   ============================ */
+ipcMain.handle('get-ws-url', () => process.env.WS_URL || "");
+ipcMain.handle('get-ws-token', () => process.env.WS_TOKEN || "");
+ipcMain.handle('get-room-id', () => process.env.ROOM_ID || "default");
