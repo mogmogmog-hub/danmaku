@@ -20,13 +20,17 @@
 <body>
 <script>
   /* ================================
-     WebSocket 自動再接続（切断検知）
+     WebSocket 自動再接続（環境変数対応）
      ================================ */
 
   let ws = null;
 
   function connectWS() {
-    ws = new WebSocket('wss://danmaku-server.onrender.com');
+    const WS_URL = window.electronAPI.getWSUrl();
+    const WS_TOKEN = window.electronAPI.getWSToken();
+
+    // ★ 環境変数から WebSocket URL + token を取得
+    ws = new WebSocket(`${WS_URL}?token=${WS_TOKEN}`);
 
     ws.onopen = () => {
       console.log("WebSocket connected");
