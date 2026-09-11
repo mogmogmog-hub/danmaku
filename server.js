@@ -1,3 +1,5 @@
+require('dotenv').config();   // ★ 追加：環境変数を読み込む
+
 const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
@@ -78,7 +80,6 @@ app.post('/comment', (req, res) => {
   // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
   if (!process.env.RENDER) {
     console.log("ローカル環境 → CSV 保存:", payload);
-    // Electron 側で保存するため、ここでは何もしない
   }
 
   broadcast(JSON.stringify(payload));
