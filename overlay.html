@@ -40,16 +40,16 @@
 
     ws.onerror = (err) => {
       console.log("WebSocket error:", err);
-      ws.close(); // → onclose が発火する
+      ws.close();
     };
 
     ws.onclose = () => {
       console.log("WebSocket closed. Reconnecting in 3 seconds...");
-      setTimeout(connectWS, 3000);  // ★ 切断時だけ再接続
+      setTimeout(connectWS, 3000);
     };
   }
 
-  connectWS(); // 初回接続
+  connectWS();
 
 
   /* ================================
@@ -59,16 +59,9 @@
   const laneCount = 15;
   const lanes = Array(laneCount).fill(0);
 
-  // ★ 最大フォントサイズ（xlarge = 120px）を安全マージンとして確保
   const maxFontSize = 120;
-
-  // ★ タスクバーを含む画面全体の高さ
   const fullHeight = window.screen.height;
-
-  // ★ 画面下の120+35pxを使わない「安全な高さ」
   const effectiveHeight = fullHeight - (maxFontSize + 35);
-
-  // ★ この高さをレーンに割り当てる
   const laneHeight = effectiveHeight / laneCount;
 
   function getLane(durationMs) {
@@ -87,24 +80,37 @@
     return bestLane;
   }
 
+
+  /* ================================
+     絵文字除去（プロ仕様）
+     ================================ */
+  function removeEmoji(text) {
+    return text.replace(/\p{Emoji}/gu, "");
+  }
+
+
   /* ================================
      コメント生成
      ================================ */
   function spawnComment({ text, color, size, speed, fixed }) {
+
+    // ★ 絵文字だけ除去して文字部分だけ残す
+    const cleanText = removeEmoji(text);
+    if (!cleanText || cleanText.trim() === "") return;
+
     const div = document.createElement('div');
     div.className = 'comment';
-    div.textContent = text;
+    div.textContent = cleanText;
 
     div.style.color = color || '#eeeeee';
 
     const sizeMap = { small: '48px', medium: '60px', large: '90px', xlarge: '120px' };
     div.style.fontSize = sizeMap[size] || '60px';
 
-    /* ================================
-       固定表示（重ならないレーンを使用）
-       ================================ */
+
+    /* 固定表示 */
     if (fixed === true || fixed === "true") {
-      const durationMs = 3000;  // 固定表示の表示時間
+      const durationMs = 3000;
       const lane = getLane(durationMs);
       const y = lane * laneHeight;
 
@@ -118,10 +124,7 @@
       return;
     }
 
-    /* ================================
-       通常の流れる弾幕
-       ================================ */
-
+    /* 流れる弾幕 */
     const duration = speed || 12;
     const durationMs = duration * 1000;
 
