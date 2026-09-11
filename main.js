@@ -1,3 +1,5 @@
+require('dotenv').config();   // ★ 追加：.env を読み込む
+
 const { app, BrowserWindow, screen, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -117,7 +119,7 @@ function showPreviewOverlay(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,   // ★ タスクバー含む高さ
+    height: target.bounds.height,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -155,7 +157,7 @@ function createOverlayWindow(displayIndex) {
     x: target.bounds.x,
     y: target.bounds.y,
     width: target.bounds.width,
-    height: target.bounds.height,   // ★ タスクバー含む高さに修正
+    height: target.bounds.height,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
