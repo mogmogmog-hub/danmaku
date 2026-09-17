@@ -186,7 +186,6 @@
     <label>表示速度：</label>
     <div class="options">
       <label><input type="radio" name="speed" value="12" checked> 普通</label>
-	  <label><input type="radio" name="speed" id="speed-random"> ランダム</label>
  <!-- <label><input type="radio" name="speed" value="8"> 速い</label>  -->
  <!-- <label><input type="radio" name="speed" value="4"> 高速</label>  -->
  <!-- <label><input type="radio" name="speed" value="2"> 超高速</label>  -->
@@ -204,10 +203,6 @@
   <div id="status"></div>
 
   <script>
-	document.addEventListener("DOMContentLoaded", function() {
-		const radio = document.getElementById("speed-random");
-		radio.value = Math.floor(Math.random() * 13) + 2;  // 2〜14
-	});
     /* ================================
        色選択の視認性向上
        ================================ */
