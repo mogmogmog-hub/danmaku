@@ -39,11 +39,13 @@ h1 {
   white-space: nowrap;
 }
 
+/* ★ 中央揃えを追加（数字ボタン & わかった／わからないボタン） */
 .number-buttons,
 .understanding-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;   /* ← 中央揃え */
+  gap: 12px;                 /* ← 均等な間隔 */
   margin-bottom: 30px;
 }
 
