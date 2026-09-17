@@ -76,6 +76,12 @@
     /* ================================
        色選択の視認性向上
        ================================ */
+	// ★ 起動時に最初の色ボタンを選択状態にする
+	const defaultColorBtn = document.querySelector('.color-btn input:checked');
+	if (defaultColorBtn) {
+	  defaultColorBtn.parentElement.classList.add('selected');
+	}
+
     const colorButtons = document.querySelectorAll(".color-btn");
     colorButtons.forEach(btn => {
       btn.addEventListener("click", () => {
