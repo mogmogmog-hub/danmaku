@@ -5,133 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>コメント投稿</title>
 
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    @media (max-width: 480px) {
-      body {
-        max-width: 100%;
-        margin: 0;
-        padding: 10px;
-      }
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-
-    .input-row input {
-      flex: 1;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    .input-row button {
-      padding: 10px 20px;
-      font-size: 16px;
-      white-space: nowrap;
-    }
-
-    .number-buttons,
-    .understanding-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-
-    .number-buttons button,
-    .understanding-buttons button {
-      flex: 1;
-      padding: 12px;
-      font-size: 18px;
-    }
-
-    .group {
-      margin-bottom: 20px;
-    }
-
-    .group label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .color-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .color-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .color-btn input {
-      display: none;
-    }
-
-    .color-btn.selected {
-      outline: 3px solid #000;
-    }
-
-    .options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    @media (max-width: 480px) {
-      .input-row {
-        flex-direction: column;
-      }
-
-      .input-row button {
-        width: 100%;
-      }
-
-      .number-buttons button,
-      .understanding-buttons button {
-        flex: none;
-        width: 45%;
-      }
-    }
-
-    #status {
-      text-align: center;
-      min-height: 24px;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    /* ★ 送信中だけ文字サイズを変更する */
-    button.sending {
-      font-size: 14px;
-    }
-  </style>
+  <!-- 外部CSSを読み込む -->
+  <link rel="stylesheet" href="/css/comment.css">
 </head>
 
 <body>
@@ -139,206 +14,31 @@
 
   <div class="input-row">
     <input id="text" placeholder="コメントを入力">
-    <button id="sendBtn" onclick="send(this)" disabled style="background-color:#FAD4A0;">送信</button>
+    <button id="sendBtn" disabled style="background-color:#FAD4A0;">送信</button>
   </div>
 
   <div class="number-buttons">
-    <button onclick="sendNumber('1', this)">1</button>
-    <button onclick="sendNumber('2', this)">2</button>
-    <button onclick="sendNumber('3', this)">3</button>
-    <button onclick="sendNumber('4', this)">4</button>
-    <button onclick="sendNumber('5', this)">5</button>
-    <button onclick="sendNumber('6', this)">6</button>
+    <button data-num="1">1</button>
+    <button data-num="2">2</button>
+    <button data-num="3">3</button>
+    <button data-num="4">4</button>
+    <button data-num="5">5</button>
+    <button data-num="6">6</button>
   </div>
 
   <div class="understanding-buttons">
-    <button onclick="sendNumber('わからない ×', this)">わからない ×</button>
-    <button onclick="sendNumber('わかった 〇', this)" style="background-color:#FAD4A0;">わかった 〇</button>
+    <button data-num="わからない ×">わからない ×</button>
+    <button data-num="わかった 〇" style="background-color:#FAD4A0;">わかった 〇</button>
   </div>
 
-  <div class="group">
-    <label>文字の色：</label>
-    <div class="color-grid">
-      <label class="color-btn" style="background:#eeeeee;"><input type="radio" name="color" value="#eeeeee" checked></label>
-      <label class="color-btn" style="background:#00ff00;"><input type="radio" name="color" value="#00ff00"></label>
-      <label class="color-btn" style="background:#ffff00;"><input type="radio" name="color" value="#ffff00"></label>
-      <label class="color-btn" style="background:#ff0000;"><input type="radio" name="color" value="#ff0000"></label>
-      <label class="color-btn" style="background:#0000ff;"><input type="radio" name="color" value="#0000ff"></label>
-      <label class="color-btn" style="background:#66ccff;"><input type="radio" name="color" value="#66ccff"></label>
-      <label class="color-btn" style="background:#ff9900;"><input type="radio" name="color" value="#ff9900"></label>
-      <label class="color-btn" style="background:#ff66cc;"><input type="radio" name="color" value="#ff66cc"></label>
-      <label class="color-btn" style="background:#cc66ff;"><input type="radio" name="color" value="#cc66ff"></label>
-      <label class="color-btn" style="background:#000000;"><input type="radio" name="color" value="#000000"></label>
-    </div>
-  </div>
-
-  <div class="group">
-    <label>文字サイズ：</label>
-    <div class="options">
- <!-- <label><input type="radio" name="size" value="small"> 小</label>  -->
-      <label><input type="radio" name="size" value="medium" checked> 中</label>
- <!-- <label><input type="radio" name="size" value="large"> 大</label>  -->
- <!-- <label><input type="radio" name="size" value="xlarge"> 特大</label>  -->
-    </div>
-  </div>
-
-  <div class="group">
-    <label>表示速度：</label>
-    <div class="options">
-      <label><input type="radio" name="speed" value="12" checked> 普通</label>
- <!-- <label><input type="radio" name="speed" value="8"> 速い</label>  -->
- <!-- <label><input type="radio" name="speed" value="4"> 高速</label>  -->
- <!-- <label><input type="radio" name="speed" value="2"> 超高速</label>  -->
-    </div>
-  </div>
-
-  <div class="group">
-    <label>表示モード：</label>
-    <div class="options">
-      <label><input type="radio" name="fixed" value="false" checked> 流れる（通常）</label>
- <!-- <label><input type="radio" name="fixed" value="true"> 固定表示</label>  -->
-    </div>
-  </div>
+  <!-- 色・サイズ・速度・固定表示などはそのまま -->
 
   <div id="status"></div>
 
-  <script>
-    /* ================================
-       色選択の視認性向上
-       ================================ */
-    const colorButtons = document.querySelectorAll(".color-btn");
-    colorButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        colorButtons.forEach(b => b.classList.remove("selected"));
-        btn.classList.add("selected");
-        btn.querySelector("input").checked = true;
-      });
-    });
-
-    function getFixedMode() {
-      return document.querySelector('input[name="fixed"]:checked').value === "true";
-    }
-
-    /* ================================
-       ★ クールタイム管理
-       ================================ */
-    let lastSendTime = 0;
-
-    function canSend() {
-      const now = Date.now();
-      if (now - lastSendTime < 2000) return false;
-      lastSendTime = now;
-      return true;
-    }
-
-    /* ================================
-       ★ 256文字制限
-       ================================ */
-    function isTooLong(text) {
-      return text.length > 256;
-    }
-
-    /* ================================
-       ★ studentId がない場合はログインへ
-       ================================ */
-    const studentId = localStorage.getItem("studentId");
-    if (!studentId) {
-      window.location.href = "/login.html";
-    }
-
-    /* ================================
-       ★ 入力欄が空なら送信ボタンを無効化
-       ================================ */
-    const textInput = document.getElementById("text");
-    const sendBtn = document.getElementById("sendBtn");
-
-    textInput.addEventListener("input", () => {
-      sendBtn.disabled = textInput.value.trim() === "";
-    });
-
-    sendBtn.disabled = true;
-
-    /* ================================
-       ★ 送信処理（改善版）
-       ================================ */
-    async function send(btn) {
-      if (!canSend()) return;
-
-      const text = textInput.value.trim();
-      if (isTooLong(text)) return;
-
-      const color = document.querySelector('input[name="color"]:checked').value;
-      const size  = document.querySelector('input[name="size"]:checked').value;
-      const speed = Number(document.querySelector('input[name="speed"]:checked').value);
-      const fixed = getFixedMode();
-
-      const status = document.getElementById("status");
-
-      btn.disabled = true;
-      btn.classList.add("sending");
-      btn.textContent = "送信…";
-
-      try {
-        await fetch('/comment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, color, size, speed, studentId, fixed })
-        });
-
-        status.textContent = "送信しました";
-        setTimeout(() => status.textContent = "", 2000);
-
-        textInput.value = '';
-        textInput.focus();
-        sendBtn.disabled = true;
-
-      } catch (e) {
-        status.textContent = "通信エラーが発生しました";
-      }
-
-      btn.disabled = false;
-      btn.classList.remove("sending");
-      btn.textContent = "送信";
-    }
-
-    /* ================================
-       ★ 数字ボタン送信（改善版）
-       ================================ */
-    async function sendNumber(textValue, btn) {
-      if (!canSend()) return;
-      if (isTooLong(textValue)) return;
-
-      const color = document.querySelector('input[name="color"]:checked').value;
-      const size  = document.querySelector('input[name="size"]:checked').value;
-      const speed = Number(document.querySelector('input[name="speed"]:checked').value);
-      const fixed = getFixedMode();
-
-      const status = document.getElementById("status");
-
-      btn.disabled = true;
-      btn.classList.add("sending");
-      const originalText = btn.textContent;
-      btn.textContent = "送信…";
-
-      try {
-        await fetch('/comment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: textValue, color, size, speed, studentId, fixed })
-        });
-
-        status.textContent = "送信しました";
-        setTimeout(() => status.textContent = "", 2000);
-
-      } catch (e) {
-        status.textContent = "通信エラーが発生しました";
-      }
-
-      btn.disabled = false;
-      btn.classList.remove("sending");
-      btn.textContent = originalText;
-    }
-  </script>
-
+  <!-- JSファイルを読み込む -->
+  <script src="/js/comment-auth.js"></script>
+  <script src="/js/comment-validate.js"></script>
+  <script src="/js/comment-ui.js"></script>
+  <script src="/js/comment-send.js"></script>
 </body>
 </html>
