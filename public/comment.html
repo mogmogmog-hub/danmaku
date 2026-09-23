@@ -47,29 +47,41 @@
       <label class="color-btn" style="background:#000000;"><input type="radio" name="color" value="#000000"></label>
     </div>
   </div>
+
   <div class="group">
     <label>文字サイズ：</label>
     <div class="options">
- <!-- <label><input type="radio" name="size" value="small"> 小</label>  -->
+      <label><input type="radio" name="size" value="small"> 小</label>
       <label><input type="radio" name="size" value="medium" checked> 中</label>
- <!-- <label><input type="radio" name="size" value="large"> 大</label>  -->
- <!-- <label><input type="radio" name="size" value="xlarge"> 特大</label>  -->
+      <label><input type="radio" name="size" value="large"> 大</label>
+      <label><input type="radio" name="size" value="xlarge"> 特大</label>
     </div>
   </div>
+  
+  <div class="group">
+    <label>表示位置：</label>
+    <div class="options">
+      <label><input type="radio" name="laneRange" value="default" checked> デフォルト</label>
+      <label><input type="radio" name="laneRange" value="top"> 上段</label>
+      <label><input type="radio" name="laneRange" value="middle"> 中段</label>
+      <label><input type="radio" name="laneRange" value="bottom"> 下段</label>
+    </div>
+  </div>
+  
   <div class="group">
     <label>表示速度：</label>
     <div class="options">
       <label><input type="radio" name="speed" value="auto" checked> 自動</label>
- <!-- <label><input type="radio" name="speed" value="8"> 普通</label>
+      <label><input type="radio" name="speed" value="8"> 普通</label>
 	  <label><input type="radio" name="speed" value="4"> はやい</label>
-	  <label><input type="radio" name="speed" value="2"> 超高速</label>  -->
+	  <label><input type="radio" name="speed" value="2"> 超高速</label>
     </div>
   </div>
   <div class="group">
     <label>表示モード：</label>
     <div class="options">
       <label><input type="radio" name="fixed" value="false" checked> 流れる（通常）</label>
- <!-- <label><input type="radio" name="fixed" value="true"> 固定表示</label>  -->
+      <label><input type="radio" name="fixed" value="true"> 固定表示</label>
     </div>
   </div>
 
@@ -77,11 +89,10 @@
     /* ================================
        色選択の視認性向上
        ================================ */
-	// ★ 起動時に最初の色ボタンを選択状態にする
-	const defaultColorBtn = document.querySelector('.color-btn input:checked');
-	if (defaultColorBtn) {
-	  defaultColorBtn.parentElement.classList.add('selected');
-	}
+    const defaultColorBtn = document.querySelector('.color-btn input:checked');
+    if (defaultColorBtn) {
+      defaultColorBtn.parentElement.classList.add('selected');
+    }
 
     const colorButtons = document.querySelectorAll(".color-btn");
     colorButtons.forEach(btn => {
@@ -97,7 +108,7 @@
     }
 
     /* ================================
-       ★ クールタイム管理
+       クールタイム管理
        ================================ */
     let lastSendTime = 0;
 
@@ -109,14 +120,14 @@
     }
 
     /* ================================
-       ★ 256文字制限
+       256文字制限
        ================================ */
     function isTooLong(text) {
       return text.length > 256;
     }
 
     /* ================================
-       ★ studentId がない場合はログインへ
+       studentId がない場合はログインへ
        ================================ */
     const studentId = localStorage.getItem("studentId");
     if (!studentId) {
@@ -124,7 +135,7 @@
     }
 
     /* ================================
-       ★ 入力欄が空なら送信ボタンを無効化
+       入力欄が空なら送信ボタンを無効化
        ================================ */
     const textInput = document.getElementById("text");
     const sendBtn = document.getElementById("sendBtn");
@@ -136,7 +147,7 @@
     sendBtn.disabled = true;
 
     /* ================================
-       ★ 送信処理（改善版）
+       送信処理（表示位置追加版）
        ================================ */
     async function send(btn) {
       if (!canSend()) return;
@@ -148,6 +159,7 @@
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
+      const laneRange = document.querySelector('input[name="laneRange"]:checked').value;
 
       const status = document.getElementById("status");
 
@@ -159,7 +171,7 @@
         await fetch('/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, color, size, speed, studentId, fixed })
+          body: JSON.stringify({ text, color, size, speed, studentId, fixed, laneRange })
         });
 
         status.textContent = "送信しました";
@@ -179,7 +191,7 @@
     }
 
     /* ================================
-       ★ 数字ボタン送信（改善版）
+       数字ボタン送信（表示位置追加版）
        ================================ */
     async function sendNumber(textValue, btn) {
       if (!canSend()) return;
@@ -189,6 +201,7 @@
       const size  = document.querySelector('input[name="size"]:checked').value;
       const speed = Number(document.querySelector('input[name="speed"]:checked').value);
       const fixed = getFixedMode();
+      const laneRange = document.querySelector('input[name="laneRange"]:checked').value;
 
       const status = document.getElementById("status");
 
@@ -201,7 +214,7 @@
         await fetch('/comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: textValue, color, size, speed, studentId, fixed })
+          body: JSON.stringify({ text: textValue, color, size, speed, studentId, fixed, laneRange })
         });
 
         status.textContent = "送信しました";
