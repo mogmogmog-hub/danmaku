@@ -55,7 +55,7 @@ function isNG(text) {
    ============================ */
 app.post('/comment', (req, res) => {
 
-  const { text, color, size, speed, studentId, fixed } = req.body;
+  const { text, color, size, speed, studentId, fixed, laneRange } = req.body;
 
   if (!text || text.trim() === "") {
     return res.json({ ok: false });
@@ -68,13 +68,15 @@ app.post('/comment', (req, res) => {
     return res.json({ ok: true, muted: true });
   }
 
+  /* ★ laneRange を必ず含める（重要） */
   const payload = {
     text: cleanText,
     color,
     size,
     speed,
     studentId,
-    fixed
+    fixed,
+    laneRange: laneRange || "default"   // ← これが必須！
   };
 
   // ★ Render では CSV 保存しない（ローカル Electron のみ保存）
