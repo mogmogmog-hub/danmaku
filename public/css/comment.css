@@ -39,9 +39,9 @@ h1 {
   white-space: nowrap;
 }
 
-/* ★ 中央揃えを追加（数字ボタン & わかった／わからないボタン） */
+/* ★ 中央揃えを追加（数字ボタン & 絵文字ボタン） */
 .number-buttons,
-.understanding-buttons {
+.emoji-buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;   /* ← 中央揃え */
@@ -50,7 +50,7 @@ h1 {
 }
 
 .number-buttons button,
-.understanding-buttons button {
+.emoji-buttons button {
   flex: 1;
   padding: 12px;
   font-size: 18px;
@@ -108,7 +108,7 @@ h1 {
   }
 
   .number-buttons button,
-  .understanding-buttons button {
+  .emoji-buttons button {
     flex: none;
     width: 45%;
   }
